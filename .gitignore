@@ -1,0 +1,44 @@
+# ---------- .NET ----------
+bin/
+obj/
+*.user
+*.suo
+*.rsuser
+.vs/
+TestResults/
+*.trx
+coverage*/
+appsettings.Development.local.json
+appsettings.*.local.json
+
+# El build de React se copia aquí al publicar; no se versiona
+src/backend/Muebleria.Api/wwwroot/
+
+# Fotos subidas en desarrollo
+src/backend/Muebleria.Api/uploads/
+
+# ---------- Node / React ----------
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+npm-debug.log*
+
+# ---------- Variables de entorno ----------
+.env
+.env.*
+!.env.example
+
+# ---------- Base de datos ----------
+database/backups/*
+!database/backups/.gitkeep
+*.bak
+*.mdf
+*.ldf
+
+# ---------- Editor / SO ----------
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+Thumbs.db
+.DS_Store
