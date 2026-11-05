@@ -8,7 +8,7 @@ Proyecto final de **ISB-32 Programación Avanzada**, Universidad Internacional S
 |---|---|
 | Backend | ASP.NET Core 10 (C# 14) + EF Core |
 | Frontend | React 19 + TypeScript + Vite + MUI |
-| Base de datos | SQL Server 2025 (local) |
+| Base de datos | SQL Server 2022 en desarrollo (2025 para la entrega) |
 | Entrega | 4 de diciembre de 2026 |
 
 ## Documentación
@@ -24,7 +24,7 @@ Proyecto final de **ISB-32 Programación Avanzada**, Universidad Internacional S
 |---|---|
 | SDK de .NET | 10.0.100 o superior (fijado en `global.json`) |
 | Node.js | 22 LTS o superior |
-| SQL Server | 2025 Express o Developer |
+| SQL Server | 2022 o 2025, Developer o Express. Los ejemplos usan la instancia por defecto (`.`); con Express usar `.\SQLEXPRESS` |
 | Visual Studio Code | Con las extensiones de `.vscode/extensions.json` |
 
 ## Primeros pasos
@@ -45,7 +45,7 @@ Para desarrollar:
 
 ```powershell
 # Base de datos (una vez)
-sqlcmd -S .\SQLEXPRESS -E -i database\scripts\01-usuario-app.sql
+sqlcmd -S . -E -C -i database\scripts\01-usuario-app.sql
 dotnet ef database update -p src\backend\Muebleria.Infrastructure -s src\backend\Muebleria.Api
 
 # Backend
@@ -59,5 +59,5 @@ npm run dev
 La cadena de conexión local se guarda con *user secrets*, nunca en el repositorio:
 
 ```powershell
-dotnet user-secrets set "ConnectionStrings:Inventario" "Server=.\SQLEXPRESS;Database=MuebleriaInventario;Trusted_Connection=True;TrustServerCertificate=True" --project src\backend\Muebleria.Api
+dotnet user-secrets set "ConnectionStrings:Inventario" "Server=.;Database=MuebleriaInventario;Trusted_Connection=True;TrustServerCertificate=True" --project src\backend\Muebleria.Api
 ```
