@@ -9,7 +9,6 @@ import { api, mensajeError } from '../../api/cliente'
 import type { Rol, Usuario } from '../../api/tipos'
 import { useNotificar } from '../../components/Notificaciones'
 import { Cargando, Pagina } from '../../components/Pagina'
-import { fmtFecha } from '../../lib/formato'
 
 /** RF-02: el administrador crea, edita, activa y desactiva cuentas y asigna roles. */
 export function UsuariosPage() {
@@ -27,7 +26,7 @@ export function UsuariosPage() {
         {usuarios.isLoading ? <Cargando /> : (
           <Box sx={{ overflowX: 'auto' }}>
             <Table size="small">
-              <TableHead><TableRow><TableCell>Nombre</TableCell><TableCell>Usuario</TableCell><TableCell>Rol</TableCell><TableCell>Estado</TableCell><TableCell>Creado</TableCell><TableCell /></TableRow></TableHead>
+              <TableHead><TableRow><TableCell>Nombre</TableCell><TableCell>Usuario</TableCell><TableCell>Rol</TableCell><TableCell>Estado</TableCell><TableCell /></TableRow></TableHead>
               <TableBody>
                 {usuarios.data?.map((u) => (
                   <TableRow key={u.id} sx={{ opacity: u.activo ? 1 : 0.55 }}>
@@ -35,7 +34,6 @@ export function UsuariosPage() {
                     <TableCell sx={{ fontFamily: 'monospace' }}>{u.usuario}</TableCell>
                     <TableCell>{u.rol}</TableCell>
                     <TableCell><Chip size="small" variant="outlined" color={u.activo ? 'success' : 'default'} label={u.activo ? 'Activo' : 'Inactivo'} /></TableCell>
-                    <TableCell>{fmtFecha(u.fechaCreacion)}</TableCell>
                     <TableCell align="right"><Button size="small" onClick={() => setEditando(u)}>Editar</Button></TableCell>
                   </TableRow>
                 ))}

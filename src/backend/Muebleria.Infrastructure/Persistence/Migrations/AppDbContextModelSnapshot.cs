@@ -42,14 +42,17 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     b.Property<string>("Codigo")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(30)")
                         .HasColumnName("codigo");
 
                     b.Property<string>("Estado")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("estado");
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("estado")
+                        .HasDefaultValueSql("'Buena'");
 
                     b.Property<DateOnly?>("FechaVencimiento")
                         .HasColumnType("date")
@@ -57,23 +60,27 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("FotoRuta")
                         .HasMaxLength(260)
-                        .HasColumnType("nvarchar(260)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(260)")
                         .HasColumnName("foto_ruta");
 
                     b.Property<string>("Lote")
                         .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(30)")
                         .HasColumnName("lote");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(100)")
                         .HasColumnName("nombre");
 
                     b.Property<string>("Presentacion")
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)")
                         .HasColumnName("presentacion");
 
                     b.Property<decimal>("StockActual")
@@ -97,7 +104,8 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     b.Property<string>("UnidadMedida")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)")
                         .HasColumnName("unidad_medida");
 
                     b.Property<byte[]>("Version")
@@ -138,7 +146,8 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     b.Property<string>("Alias")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(100)")
                         .HasColumnName("alias");
 
                     b.Property<int>("ArticuloId")
@@ -168,7 +177,8 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     b.Property<string>("Valor")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(200)")
                         .HasColumnName("valor");
 
                     b.HasKey("ArticuloId", "CampoId");
@@ -180,43 +190,31 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Muebleria.Domain.Entities.Bitacora", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("int")
                         .HasColumnName("id_bitacora");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Accion")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(100)")
                         .HasColumnName("accion");
-
-                    b.Property<string>("Detalle")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("detalle");
-
-                    b.Property<string>("Entidad")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("entidad");
 
                     b.Property<DateTime>("FechaHora")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
+                        .HasColumnType("datetime")
                         .HasColumnName("fecha_hora")
-                        .HasDefaultValueSql("SYSDATETIME()");
-
-                    b.Property<string>("IdEntidad")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("id_entidad");
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Modulo")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("modulo");
 
                     b.Property<int>("UsuarioId")
@@ -248,7 +246,8 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(60)")
                         .HasColumnName("nombre");
 
                     b.Property<bool>("Obligatorio")
@@ -257,7 +256,8 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Opciones")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(500)")
                         .HasColumnName("opciones");
 
                     b.Property<int>("Orden")
@@ -267,7 +267,8 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     b.Property<string>("TipoDato")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)")
                         .HasColumnName("tipo_dato");
 
                     b.HasKey("Id");
@@ -287,20 +288,18 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Activo")
-                        .HasColumnType("bit")
-                        .HasColumnName("activo");
-
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(60)")
                         .HasColumnName("nombre");
 
                     b.Property<string>("TipoInventario")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)")
                         .HasColumnName("tipo_inventario");
 
                     b.HasKey("Id");
@@ -315,18 +314,21 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                 {
                     b.Property<string>("Clave")
                         .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(60)")
                         .HasColumnName("clave");
 
                     b.Property<string>("Descripcion")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(200)")
                         .HasColumnName("descripcion");
 
                     b.Property<string>("Valor")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(200)")
                         .HasColumnName("valor");
 
                     b.HasKey("Clave");
@@ -394,7 +396,8 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     b.Property<string>("Estado")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)")
                         .HasColumnName("estado");
 
                     b.Property<DateOnly>("Fecha")
@@ -436,20 +439,22 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     b.Property<string>("EstadoAnterior")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)")
                         .HasColumnName("estado_anterior");
 
                     b.Property<string>("EstadoNuevo")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)")
                         .HasColumnName("estado_nuevo");
 
                     b.Property<DateTime>("FechaHora")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
+                        .HasColumnType("datetime")
                         .HasColumnName("fecha_hora")
-                        .HasDefaultValueSql("SYSDATETIME()");
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<int>("UsuarioId")
                         .HasColumnType("int")
@@ -484,19 +489,16 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTime>("FechaHora")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
+                        .HasColumnType("datetime")
                         .HasColumnName("fecha_hora")
-                        .HasDefaultValueSql("SYSDATETIME()");
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Motivo")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(150)")
                         .HasColumnName("motivo");
-
-                    b.Property<int?>("ReferenciaId")
-                        .HasColumnType("int")
-                        .HasColumnName("id_referencia");
 
                     b.Property<decimal>("StockAnterior")
                         .HasPrecision(10, 2)
@@ -511,7 +513,8 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     b.Property<string>("Tipo")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)")
                         .HasColumnName("tipo");
 
                     b.Property<int>("UsuarioId")
@@ -544,13 +547,15 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     b.Property<string>("Codigo")
                         .IsRequired()
                         .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(60)")
                         .HasColumnName("codigo");
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(150)")
                         .HasColumnName("descripcion");
 
                     b.HasKey("Id");
@@ -573,11 +578,12 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     b.Property<string>("Archivo")
                         .IsRequired()
                         .HasMaxLength(260)
-                        .HasColumnType("nvarchar(260)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(260)")
                         .HasColumnName("archivo");
 
                     b.Property<DateTime>("FechaHora")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("datetime")
                         .HasColumnName("fecha_hora");
 
                     b.Property<long>("TamanoBytes")
@@ -607,7 +613,8 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(30)")
                         .HasColumnName("nombre");
 
                     b.HasKey("Id");
@@ -648,20 +655,17 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id_articulo");
 
-                    b.Property<decimal>("Cantidad")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)")
-                        .HasColumnName("cantidad");
-
                     b.Property<string>("Destino")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(150)")
                         .HasColumnName("destino");
 
                     b.Property<string>("EstadoDevolucion")
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)")
                         .HasColumnName("estado_devolucion");
 
                     b.Property<DateOnly?>("FechaDevolucion")
@@ -690,8 +694,6 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
 
                     b.ToTable("SALIDA_HERRAMIENTA", t =>
                         {
-                            t.HasCheckConstraint("CK_SALIDA_HERRAMIENTA_cantidad", "[cantidad] > 0");
-
                             t.HasCheckConstraint("CK_SALIDA_HERRAMIENTA_fechas", "[fecha_prevista] >= [fecha_salida]");
                         });
                 });
@@ -721,32 +723,36 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     b.Property<string>("Estado")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("estado");
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("estado")
+                        .HasDefaultValueSql("'Pendiente'");
 
                     b.Property<DateTime?>("FechaEntrega")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("datetime")
                         .HasColumnName("fecha_entrega");
 
                     b.Property<DateTime?>("FechaResolucion")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("datetime")
                         .HasColumnName("fecha_resolucion");
 
                     b.Property<DateTime>("FechaSolicitud")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
+                        .HasColumnType("datetime")
                         .HasColumnName("fecha_solicitud")
-                        .HasDefaultValueSql("SYSDATETIME()");
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Motivo")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(150)")
                         .HasColumnName("motivo");
 
                     b.Property<string>("MotivoRechazo")
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(150)")
                         .HasColumnName("motivo_rechazo");
 
                     b.Property<int>("SolicitanteId")
@@ -784,13 +790,15 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Descripcion")
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(150)")
                         .HasColumnName("descripcion");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(60)")
                         .HasColumnName("nombre");
 
                     b.HasKey("Id");
@@ -817,25 +825,22 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     b.Property<string>("ContrasenaHash")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)")
-                        .HasColumnName("contrasena_hash");
-
-                    b.Property<DateTime>("FechaCreacion")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("fecha_creacion")
-                        .HasDefaultValueSql("SYSDATETIME()");
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(256)")
+                        .HasColumnName("contrasena");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(100)")
                         .HasColumnName("nombre");
 
                     b.Property<string>("NombreUsuario")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)")
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(30)")
                         .HasColumnName("usuario");
 
                     b.Property<int>("RolId")

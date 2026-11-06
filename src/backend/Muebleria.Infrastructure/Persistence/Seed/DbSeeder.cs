@@ -162,7 +162,7 @@ public class DbSeeder(AppDbContext db, IHasherContrasenas hasher, IConfiguration
         var rolId = await db.Roles.Where(r => r.Nombre == rol).Select(r => r.Id).FirstAsync(ct);
         db.Usuarios.Add(new Usuario
         {
-            Nombre = nombre, NombreUsuario = usuario, ContrasenaHash = hasher.Hash(contrasena), RolId = rolId, FechaCreacion = DateTime.Now,
+            Nombre = nombre, NombreUsuario = usuario, ContrasenaHash = hasher.Hash(contrasena), RolId = rolId,
         });
         await db.SaveChangesAsync(ct);
     }

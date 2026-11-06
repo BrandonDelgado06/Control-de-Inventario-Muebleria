@@ -159,8 +159,6 @@ public class ArticuloService(IAppDbContext db, IUsuarioActual actual)
     {
         var categoria = await db.Categorias.Include(c => c.Campos).FirstOrDefaultAsync(c => c.Id == req.CategoriaId, ct)
             ?? throw new DomainException("La categoría elegida no existe.");
-        if (!categoria.Activo && a.CategoriaId != categoria.Id)
-            throw new DomainException($"La categoría \"{categoria.Nombre}\" está desactivada.");
         var ubicacion = await db.Ubicaciones.FindAsync([req.UbicacionId], ct)
             ?? throw new DomainException("La ubicación elegida no existe.");
         if (!ubicacion.Activo && a.UbicacionId != ubicacion.Id)

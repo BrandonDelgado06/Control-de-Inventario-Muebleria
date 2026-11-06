@@ -1,25 +1,12 @@
 import { useState } from 'react'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import {
-  Box, MenuItem, Paper, Table, TableBody, TableCell, TableHead, TablePagination, TableRow, TextField, Typography,
+  Box, MenuItem, Paper, Table, TableBody, TableCell, TableHead, TablePagination, TableRow, TextField,
 } from '@mui/material'
 import { api } from '../../api/cliente'
 import type { Paginado, RegistroBitacora } from '../../api/tipos'
 import { Cargando, Pagina, Vacio } from '../../components/Pagina'
 import { fmtFechaHora } from '../../lib/formato'
-
-/** Convierte el detalle JSON en texto legible: {"StockActual":["3","1"]} → "StockActual: 3 → 1". */
-function detalleLegible(detalle: string | null): string {
-  if (!detalle) return ''
-  try {
-    const obj = JSON.parse(detalle) as Record<string, unknown>
-    return Object.entries(obj)
-      .map(([k, v]) => (Array.isArray(v) && v.length === 2 ? `${k}: ${v[0] ?? '—'} → ${v[1] ?? '—'}` : `${k}: ${v ?? '—'}`))
-      .join(' · ')
-  } catch {
-    return detalle
-  }
-}
 
 /** RF-03 (registro automático) y RF-04 (consulta con filtros). Solo lectura. */
 export function BitacoraPage() {
@@ -54,15 +41,14 @@ export function BitacoraPage() {
           <>
             <Box sx={{ overflowX: 'auto' }}>
               <Table size="small">
-                <TableHead><TableRow><TableCell>Fecha</TableCell><TableCell>Usuario</TableCell><TableCell>Módulo</TableCell><TableCell>Acción</TableCell><TableCell>Detalle</TableCell></TableRow></TableHead>
+                <TableHead><TableRow><TableCell>Fecha</TableCell><TableCell>Usuario</TableCell><TableCell>Módulo</TableCell><TableCell>Acción</TableCell></TableRow></TableHead>
                 <TableBody>
                   {data.items.map((b) => (
                     <TableRow key={b.id}>
                       <TableCell sx={{ whiteSpace: 'nowrap' }}>{fmtFechaHora(b.fechaHora)}</TableCell>
                       <TableCell>{b.usuario}</TableCell>
                       <TableCell>{b.modulo}</TableCell>
-                      <TableCell>{b.accion}{b.idEntidad && <Typography component="span" variant="caption" color="text.secondary"> #{b.idEntidad}</Typography>}</TableCell>
-                      <TableCell sx={{ color: 'text.secondary', fontSize: '0.8rem', maxWidth: 420, overflowWrap: 'anywhere' }}>{detalleLegible(b.detalle)}</TableCell>
+                      <TableCell>{b.accion}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

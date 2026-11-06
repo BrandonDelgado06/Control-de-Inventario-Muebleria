@@ -16,8 +16,8 @@ public class Categoria : IAuditable
 {
     public int Id { get; set; }
     public string Nombre { get; set; } = "";
+    /// <summary>Columna agregada al final: separa los módulos 5 a 8 (herramientas, acabados, materia prima, instalación).</summary>
     public TipoInventario TipoInventario { get; set; }
-    public bool Activo { get; set; } = true;
     public List<CampoPersonalizado> Campos { get; set; } = [];
 }
 

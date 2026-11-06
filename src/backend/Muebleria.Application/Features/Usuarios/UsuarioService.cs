@@ -6,7 +6,7 @@ using Muebleria.Domain.Exceptions;
 
 namespace Muebleria.Application.Features.Usuarios;
 
-public record UsuarioDto(int Id, string Nombre, string Usuario, int RolId, string Rol, bool Activo, DateTime FechaCreacion);
+public record UsuarioDto(int Id, string Nombre, string Usuario, int RolId, string Rol, bool Activo);
 
 public record RolDto(int Id, string Nombre, IReadOnlyList<string> Permisos);
 
@@ -30,7 +30,7 @@ public class UsuarioService(IAppDbContext db, IHasherContrasenas hasher, IUsuari
     public Task<List<UsuarioDto>> ListarAsync(CancellationToken ct) =>
         db.Usuarios
             .OrderByDescending(u => u.Activo).ThenBy(u => u.Nombre)
-            .Select(u => new UsuarioDto(u.Id, u.Nombre, u.NombreUsuario, u.RolId, u.Rol.Nombre, u.Activo, u.FechaCreacion))
+            .Select(u => new UsuarioDto(u.Id, u.Nombre, u.NombreUsuario, u.RolId, u.Rol.Nombre, u.Activo))
             .ToListAsync(ct);
 
     public async Task<List<RolDto>> RolesAsync(CancellationToken ct)
@@ -52,7 +52,6 @@ public class UsuarioService(IAppDbContext db, IHasherContrasenas hasher, IUsuari
             NombreUsuario = nombreUsuario,
             ContrasenaHash = hasher.Hash(req.Contrasena),
             RolId = req.RolId,
-            FechaCreacion = DateTime.Now,
         };
         db.Usuarios.Add(usuario);
         await db.SaveChangesAsync(ct);
@@ -78,7 +77,7 @@ public class UsuarioService(IAppDbContext db, IHasherContrasenas hasher, IUsuari
 
     private async Task<UsuarioDto> ObtenerAsync(int id, CancellationToken ct) =>
         await db.Usuarios.Where(u => u.Id == id)
-            .Select(u => new UsuarioDto(u.Id, u.Nombre, u.NombreUsuario, u.RolId, u.Rol.Nombre, u.Activo, u.FechaCreacion))
+            .Select(u => new UsuarioDto(u.Id, u.Nombre, u.NombreUsuario, u.RolId, u.Rol.Nombre, u.Activo))
             .FirstOrDefaultAsync(ct) ?? throw new NoEncontradoException("Usuario", id);
 
     private async Task ValidarRolAsync(int rolId, CancellationToken ct)

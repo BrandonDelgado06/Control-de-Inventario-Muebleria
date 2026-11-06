@@ -57,7 +57,7 @@ public class CategoriasController(CategoriaService categorias) : ControllerBase
 {
     [HttpGet]
     [Authorize(Policy = Permisos.ArticulosVer)]
-    public Task<List<CategoriaDto>> Listar([FromQuery] bool incluirInactivas, CancellationToken ct) => categorias.ListarAsync(incluirInactivas, ct);
+    public Task<List<CategoriaDto>> Listar(CancellationToken ct) => categorias.ListarAsync(ct);
 
     [HttpGet("{id:int}")]
     [Authorize(Policy = Permisos.ArticulosVer)]

@@ -9,7 +9,7 @@ namespace Muebleria.Application.Features.Categorias;
 
 public record CampoDto(int Id, string Nombre, TipoDato TipoDato, bool Obligatorio, IReadOnlyList<string> Opciones, int Orden);
 
-public record CategoriaDto(int Id, string Nombre, TipoInventario TipoInventario, bool Activo, int CantidadArticulos, IReadOnlyList<CampoDto> Campos);
+public record CategoriaDto(int Id, string Nombre, TipoInventario TipoInventario, int CantidadArticulos, IReadOnlyList<CampoDto> Campos);
 
 public record CampoRequest(
     int? Id,
@@ -21,16 +21,14 @@ public record CampoRequest(
 public record CategoriaRequest(
     [Required(ErrorMessage = "El nombre es obligatorio."), MaxLength(60)] string Nombre,
     TipoInventario TipoInventario,
-    bool Activo,
     IReadOnlyList<CampoRequest> Campos);
 
 /// <summary>RF-07: categorías con campos personalizados (medidas, color, grosor, número de grano…).</summary>
 public class CategoriaService(IAppDbContext db)
 {
-    public async Task<List<CategoriaDto>> ListarAsync(bool incluirInactivas, CancellationToken ct)
+    public async Task<List<CategoriaDto>> ListarAsync(CancellationToken ct)
     {
         var categorias = await db.Categorias.Include(c => c.Campos)
-            .Where(c => incluirInactivas || c.Activo)
             .OrderBy(c => c.Nombre)
             .ToListAsync(ct);
         var conteos = await db.Articulos.Where(a => a.Activo)
@@ -50,7 +48,7 @@ public class CategoriaService(IAppDbContext db)
     public async Task<CategoriaDto> CrearAsync(CategoriaRequest req, CancellationToken ct)
     {
         await ValidarAsync(req, null, ct);
-        var categoria = new Categoria { Nombre = req.Nombre.Trim(), TipoInventario = req.TipoInventario, Activo = req.Activo };
+        var categoria = new Categoria { Nombre = req.Nombre.Trim(), TipoInventario = req.TipoInventario };
         var orden = 0;
         foreach (var campo in req.Campos)
             categoria.Campos.Add(NuevoCampo(campo, ++orden));
@@ -64,12 +62,9 @@ public class CategoriaService(IAppDbContext db)
         var categoria = await db.Categorias.Include(c => c.Campos).FirstOrDefaultAsync(c => c.Id == id, ct)
             ?? throw new NoEncontradoException("Categoría", id);
         await ValidarAsync(req, id, ct);
-        if (!req.Activo && await db.Articulos.AnyAsync(a => a.CategoriaId == id && a.Activo, ct))
-            throw new DomainException("No se puede desactivar: la categoría tiene artículos activos.");
 
         categoria.Nombre = req.Nombre.Trim();
         categoria.TipoInventario = req.TipoInventario;
-        categoria.Activo = req.Activo;
 
         // Campos que ya no vienen en la petición: se eliminan solo si ningún artículo los usa.
         var idsEnviados = req.Campos.Where(c => c.Id.HasValue).Select(c => c.Id!.Value).ToHashSet();
@@ -135,5 +130,5 @@ public class CategoriaService(IAppDbContext db)
             c.Opciones?.Split('|', StringSplitOptions.RemoveEmptyEntries) ?? [], c.Orden);
 
     private static CategoriaDto ADto(Categoria c, int cantidad) =>
-        new(c.Id, c.Nombre, c.TipoInventario, c.Activo, cantidad, c.Campos.OrderBy(x => x.Orden).Select(ACampoDto).ToList());
+        new(c.Id, c.Nombre, c.TipoInventario, cantidad, c.Campos.OrderBy(x => x.Orden).Select(ACampoDto).ToList());
 }

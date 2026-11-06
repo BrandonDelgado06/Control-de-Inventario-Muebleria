@@ -4,7 +4,7 @@ using Muebleria.Application.Common.Interfaces;
 
 namespace Muebleria.Application.Features.Auditoria;
 
-public record BitacoraDto(long Id, DateTime FechaHora, string Usuario, string Modulo, string Accion, string? Entidad, string? IdEntidad, string? Detalle);
+public record BitacoraDto(int Id, DateTime FechaHora, string Usuario, string Modulo, string Accion);
 
 public record BitacoraFiltro(int? UsuarioId = null, string? Modulo = null, string? Accion = null, DateOnly? Desde = null, DateOnly? Hasta = null, int Pagina = 1, int Tamano = 50);
 
@@ -21,7 +21,7 @@ public class BitacoraService(IAppDbContext db)
         if (f.Hasta is { } h) q = q.Where(b => b.FechaHora < h.AddDays(1).ToDateTime(TimeOnly.MinValue));
 
         return q.OrderByDescending(b => b.Id)
-            .Select(b => new BitacoraDto(b.Id, b.FechaHora, b.Usuario.Nombre, b.Modulo, b.Accion, b.Entidad, b.IdEntidad, b.Detalle))
+            .Select(b => new BitacoraDto(b.Id, b.FechaHora, b.Usuario.Nombre, b.Modulo, b.Accion))
             .PaginarAsync(f.Pagina, f.Tamano, ct);
     }
 

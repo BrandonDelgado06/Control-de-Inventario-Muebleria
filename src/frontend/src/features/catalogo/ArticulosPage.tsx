@@ -14,10 +14,10 @@ import { Cargando, ChipEstado, ChipStock, Pagina, Vacio } from '../../components
 import { diasHasta, fmtFecha, nombreTipoInventario } from '../../lib/formato'
 import { ArticuloFormDialog } from './ArticuloFormDialog'
 
-export function useCategorias(incluirInactivas = false) {
+export function useCategorias() {
   return useQuery({
-    queryKey: ['categorias', incluirInactivas],
-    queryFn: async () => (await api.get<Categoria[]>('/categorias', { params: { incluirInactivas } })).data,
+    queryKey: ['categorias'],
+    queryFn: async () => (await api.get<Categoria[]>('/categorias')).data,
   })
 }
 

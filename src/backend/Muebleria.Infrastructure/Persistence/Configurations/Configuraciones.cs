@@ -43,8 +43,7 @@ internal class UsuarioConfig : IEntityTypeConfiguration<Usuario>
         b.Property(x => x.Nombre).HasMaxLength(100).IsRequired();
         b.Property(x => x.NombreUsuario).HasColumnName("usuario").HasMaxLength(30).IsRequired();
         b.HasIndex(x => x.NombreUsuario).IsUnique();
-        b.Property(x => x.ContrasenaHash).HasMaxLength(256).IsRequired();
-        b.Property(x => x.FechaCreacion).HasDefaultValueSql("SYSDATETIME()");
+        b.Property(x => x.ContrasenaHash).HasColumnName("contrasena").HasMaxLength(256).IsRequired();
         b.HasOne(x => x.Rol).WithMany().HasForeignKey(x => x.RolId).OnDelete(DeleteBehavior.Restrict);
     }
 }
@@ -55,9 +54,7 @@ internal class BitacoraConfig : IEntityTypeConfiguration<Bitacora>
     {
         b.Property(x => x.Modulo).HasMaxLength(50).IsRequired();
         b.Property(x => x.Accion).HasMaxLength(100).IsRequired();
-        b.Property(x => x.Entidad).HasMaxLength(50);
-        b.Property(x => x.IdEntidad).HasMaxLength(50);
-        b.Property(x => x.FechaHora).HasDefaultValueSql("SYSDATETIME()");
+        b.Property(x => x.FechaHora).HasDefaultValueSql("GETDATE()");
         b.HasIndex(x => x.FechaHora);
         b.HasOne(x => x.Usuario).WithMany().HasForeignKey(x => x.UsuarioId).OnDelete(DeleteBehavior.Restrict);
     }
@@ -129,6 +126,8 @@ internal class ArticuloConfig : IEntityTypeConfiguration<Articulo>
         b.Property(x => x.UnidadMedida).HasMaxLength(20).IsRequired();
         b.Property(x => x.StockActual).HasDefaultValue(0m);
         b.Property(x => x.StockMinimo).HasDefaultValue(0m);
+        // Valor por defecto del diccionario. ValueGeneratedNever: EF siempre envía el estado elegido.
+        b.Property(x => x.Estado).HasDefaultValueSql("'Buena'").ValueGeneratedNever();
         b.Property(x => x.Lote).HasMaxLength(30);
         b.Property(x => x.Presentacion).HasMaxLength(20);
         b.Property(x => x.FotoRuta).HasMaxLength(260);
@@ -165,7 +164,7 @@ internal class HistorialEstadoConfig : IEntityTypeConfiguration<HistorialEstado>
 {
     public void Configure(EntityTypeBuilder<HistorialEstado> b)
     {
-        b.Property(x => x.FechaHora).HasDefaultValueSql("SYSDATETIME()");
+        b.Property(x => x.FechaHora).HasDefaultValueSql("GETDATE()");
         b.HasOne(x => x.Articulo).WithMany().HasForeignKey(x => x.ArticuloId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne(x => x.Usuario).WithMany().HasForeignKey(x => x.UsuarioId).OnDelete(DeleteBehavior.Restrict);
     }
@@ -177,7 +176,7 @@ internal class MovimientoConfig : IEntityTypeConfiguration<Movimiento>
     {
         b.ToTable(t => t.HasCheckConstraint("CK_MOVIMIENTO_cantidad", "[cantidad] > 0"));
         b.Property(x => x.Motivo).HasMaxLength(150).IsRequired();
-        b.Property(x => x.FechaHora).HasDefaultValueSql("SYSDATETIME()");
+        b.Property(x => x.FechaHora).HasDefaultValueSql("GETDATE()");
         b.HasIndex(x => new { x.ArticuloId, x.FechaHora });
         b.HasIndex(x => x.FechaHora);
         b.HasOne(x => x.Articulo).WithMany().HasForeignKey(x => x.ArticuloId).OnDelete(DeleteBehavior.Restrict);
@@ -192,7 +191,8 @@ internal class SolicitudConfig : IEntityTypeConfiguration<Solicitud>
         b.ToTable(t => t.HasCheckConstraint("CK_SOLICITUD_cantidad", "[cantidad] > 0"));
         b.Property(x => x.Motivo).HasMaxLength(150).IsRequired();
         b.Property(x => x.MotivoRechazo).HasMaxLength(150);
-        b.Property(x => x.FechaSolicitud).HasDefaultValueSql("SYSDATETIME()");
+        b.Property(x => x.Estado).HasDefaultValueSql("'Pendiente'").ValueGeneratedNever();
+        b.Property(x => x.FechaSolicitud).HasDefaultValueSql("GETDATE()");
         b.HasIndex(x => x.Estado);
         b.HasOne(x => x.Articulo).WithMany().HasForeignKey(x => x.ArticuloId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne(x => x.Solicitante).WithMany().HasForeignKey(x => x.SolicitanteId).OnDelete(DeleteBehavior.Restrict);
@@ -206,7 +206,6 @@ internal class SalidaHerramientaConfig : IEntityTypeConfiguration<SalidaHerramie
     {
         b.ToTable(t =>
         {
-            t.HasCheckConstraint("CK_SALIDA_HERRAMIENTA_cantidad", "[cantidad] > 0");
             t.HasCheckConstraint("CK_SALIDA_HERRAMIENTA_fechas", "[fecha_prevista] >= [fecha_salida]");
         });
         b.Property(x => x.Id).HasColumnName("id_salida");

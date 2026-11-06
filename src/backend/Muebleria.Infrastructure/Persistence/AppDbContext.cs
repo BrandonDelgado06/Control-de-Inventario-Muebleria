@@ -1,7 +1,7 @@
-using System.Text;
-using System.Text.Json;
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Muebleria.Application.Common.Interfaces;
 using Muebleria.Domain.Common;
 using Muebleria.Domain.Entities;
@@ -32,14 +32,24 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IUsuarioActual
     public DbSet<ConteoFisico> ConteosFisicos => Set<ConteoFisico>();
     public DbSet<ConteoDetalle> ConteoDetalles => Set<ConteoDetalle>();
 
+    /// <summary>
+    /// Estados con los textos exactos del diccionario de datos: "Dañada" y "De baja"
+    /// no pueden ser nombres de un enum de C#, así que se traducen al guardar y al leer.
+    /// </summary>
+    private static readonly ValueConverter<EstadoArticulo, string> ConvertidorEstado = new(
+        e => e == EstadoArticulo.Danada ? "Dañada" : e == EstadoArticulo.DeBaja ? "De baja" : e.ToString(),
+        s => s == "Dañada" ? EstadoArticulo.Danada : s == "De baja" ? EstadoArticulo.DeBaja : Enum.Parse<EstadoArticulo>(s));
+
     protected override void ConfigureConventions(ModelConfigurationBuilder b)
     {
-        // Montos y cantidades: DECIMAL(10,2) como en el diccionario de datos.
+        // Tipos del diccionario de datos: VARCHAR (no NVARCHAR), DATETIME y DECIMAL(10,2).
+        b.Properties<string>().AreUnicode(false);
+        b.Properties<DateTime>().HaveColumnType("datetime");
+        b.Properties<DateTime?>().HaveColumnType("datetime");
         b.Properties<decimal>().HavePrecision(10, 2);
-        // Los enums se guardan como texto (VARCHAR(20)): "Entrada", "Buena", "Pendiente"…
+        // Los enums se guardan como texto VARCHAR(20): "Entrada", "Buena", "Pendiente"…
         b.Properties<TipoInventario>().HaveConversion<string>().HaveMaxLength(20);
         b.Properties<TipoDato>().HaveConversion<string>().HaveMaxLength(20);
-        b.Properties<EstadoArticulo>().HaveConversion<string>().HaveMaxLength(20);
         b.Properties<TipoMovimiento>().HaveConversion<string>().HaveMaxLength(20);
         b.Properties<EstadoSolicitud>().HaveConversion<string>().HaveMaxLength(20);
         b.Properties<EstadoConteo>().HaveConversion<string>().HaveMaxLength(20);
@@ -48,11 +58,25 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IUsuarioActual
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
+        foreach (var entidad in modelBuilder.Model.GetEntityTypes())
+            foreach (var p in entidad.GetProperties().Where(p => p.ClrType == typeof(EstadoArticulo) || p.ClrType == typeof(EstadoArticulo?)))
+            {
+                p.SetValueConverter(ConvertidorEstado);
+                p.SetMaxLength(20);
+            }
+
+        // Todo texto es VARCHAR, también los enums que se guardan como texto (estado, tipo…).
+        foreach (var p in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetProperties()))
+            if ((p.GetValueConverter()?.ProviderClrType ?? p.GetProviderClrType() ?? p.ClrType) == typeof(string))
+                p.SetIsUnicode(false);
+
         NombresDelDiccionario.Aplicar(modelBuilder);
     }
 
     // ---------------------------------------------------------------------------------
     // Bitácora automática (RF-03) dentro de la misma transacción que el cambio (RNF-06).
+    // Guarda solo lo que pide el diccionario: usuario, módulo, acción y fecha-hora.
     // ---------------------------------------------------------------------------------
     public override async Task<int> SaveChangesAsync(CancellationToken ct = default)
     {
@@ -70,13 +94,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IUsuarioActual
             {
                 UsuarioId = usuarioId!.Value,
                 Modulo = c.Modulo,
-                Accion = c.Accion,
-                Entidad = c.Entrada.Metadata.ClrType.Name,
-                IdEntidad = c.Entrada.Properties.FirstOrDefault(p => p.Metadata.IsPrimaryKey())?.CurrentValue?.ToString(),
-                // Los movimientos se describen después de guardar, cuando ya tienen su artículo asignado.
-                Detalle = c.Entrada.Entity is Movimiento m
-                    ? JsonSerializer.Serialize(new { articulo = m.ArticuloId, m.Cantidad, m.StockAnterior, m.StockNuevo, m.Motivo })
-                    : c.Detalle,
+                // Se arma después de guardar, cuando los registros nuevos ya tienen su id.
+                Accion = Recortar(DescribirAccion(c), 100),
                 FechaHora = DateTime.Now,
             });
         }
@@ -86,9 +105,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IUsuarioActual
         return filas;
     }
 
-    private record Cambio(EntityEntry Entrada, string Modulo, string Accion, string? Detalle);
-
-    private static readonly HashSet<string> PropiedadesOcultas = ["ContrasenaHash", "Version"];
+    private record Cambio(EntityEntry Entrada, string Modulo, string Verbo);
 
     private List<Cambio> CapturarCambios()
     {
@@ -98,37 +115,38 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IUsuarioActual
             if (e.State is not (EntityState.Added or EntityState.Modified or EntityState.Deleted)) continue;
             if (e.Entity is not (IAuditable or Movimiento)) continue;
 
-            var modulo = ModuloDe(e.Entity);
-            string accion;
-            string? detalle;
-
+            string verbo;
             if (e.Entity is Movimiento m)
-            {
-                accion = $"Registrar {m.Tipo.ToString().ToLowerInvariant()}";
-                detalle = null;
-            }
+                verbo = $"Registrar {m.Tipo.ToString().ToLowerInvariant()}";
             else if (e.State == EntityState.Modified)
             {
-                var props = e.Properties
-                    .Where(p => p.IsModified && !PropiedadesOcultas.Contains(p.Metadata.Name) && !Equals(p.OriginalValue, p.CurrentValue))
-                    .ToDictionary(p => p.Metadata.Name, p => new[] { Texto(p.OriginalValue), Texto(p.CurrentValue) });
-                if (props.Count == 0 && !e.Properties.Any(p => p.Metadata.Name == "ContrasenaHash" && p.IsModified)) continue;
-                if (e.Properties.Any(p => p.Metadata.Name == "ContrasenaHash" && p.IsModified))
-                    props["Contrasena"] = ["***", "***"];
-                accion = props.TryGetValue("Activo", out var act) && props.Count == 1
-                    ? (act[1] == "True" ? "Activar" : "Desactivar")
-                    : "Editar";
-                detalle = JsonSerializer.Serialize(props);
+                var modificadas = e.Properties.Where(p => p.IsModified && !Equals(p.OriginalValue, p.CurrentValue)).ToList();
+                if (modificadas.Count == 0) continue;
+                verbo = modificadas.Count == 1 && modificadas[0].Metadata.Name == "Activo"
+                    ? (Equals(modificadas[0].CurrentValue, true) ? "Activar" : "Desactivar")
+                    : modificadas.All(p => p.Metadata.Name is "StockActual" or "Version") ? "Actualizar existencia de" : "Editar";
             }
             else
-            {
-                accion = e.State == EntityState.Added ? "Crear" : "Eliminar";
-                detalle = Resumen(e);
-            }
+                verbo = e.State == EntityState.Added ? "Crear" : "Eliminar";
 
-            lista.Add(new Cambio(e, modulo, $"{accion} {Nombre(e.Entity)}".Trim(), detalle));
+            lista.Add(new Cambio(e, ModuloDe(e.Entity), verbo));
         }
         return lista;
+    }
+
+    private static string DescribirAccion(Cambio c)
+    {
+        var id = c.Entrada.Properties.FirstOrDefault(p => p.Metadata.IsPrimaryKey())?.CurrentValue;
+        return c.Entrada.Entity switch
+        {
+            Movimiento m => $"{c.Verbo} de {m.Cantidad.ToString("0.##", CultureInfo.InvariantCulture)} en artículo #{m.ArticuloId}",
+            Articulo a => $"{c.Verbo} artículo {a.Codigo} (#{id})",
+            Usuario u => $"{c.Verbo} usuario {u.NombreUsuario} (#{id})",
+            Ubicacion u => $"{c.Verbo} ubicación {u.Nombre} (#{id})",
+            Categoria cat => $"{c.Verbo} categoría {cat.Nombre} (#{id})",
+            CampoPersonalizado f => $"{c.Verbo} campo {f.Nombre} (#{id})",
+            _ => $"{c.Verbo} {c.Entrada.Metadata.ClrType.Name} (#{id})",
+        };
     }
 
     private static string ModuloDe(object entidad) => entidad switch
@@ -141,32 +159,5 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IUsuarioActual
         _ => entidad.GetType().Name,
     };
 
-    private static string Nombre(object entidad) => entidad switch
-    {
-        Usuario => "usuario",
-        Ubicacion => "ubicación",
-        Categoria => "categoría",
-        CampoPersonalizado => "campo personalizado",
-        Articulo => "artículo",
-        _ => "",
-    };
-
-    private static string? Resumen(EntityEntry e)
-    {
-        var sb = new StringBuilder();
-        foreach (var nombre in new[] { "Codigo", "Nombre", "NombreUsuario" })
-        {
-            var p = e.Properties.FirstOrDefault(x => x.Metadata.Name == nombre);
-            if (p?.CurrentValue is not null) sb.Append(sb.Length > 0 ? " · " : "").Append(p.CurrentValue);
-        }
-        return sb.Length > 0 ? sb.ToString() : null;
-    }
-
-    private static string? Texto(object? v) => v switch
-    {
-        null => null,
-        DateOnly d => d.ToString("yyyy-MM-dd"),
-        decimal dec => dec.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture),
-        _ => v.ToString(),
-    };
+    private static string Recortar(string s, int max) => s.Length <= max ? s : s[..(max - 1)] + "…";
 }

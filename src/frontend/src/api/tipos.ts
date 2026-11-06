@@ -27,7 +27,6 @@ export interface Usuario {
   rolId: number
   rol: string
   activo: boolean
-  fechaCreacion: string
 }
 
 export interface Rol {
@@ -57,7 +56,6 @@ export interface Categoria {
   id: number
   nombre: string
   tipoInventario: TipoInventario
-  activo: boolean
   cantidadArticulos: number
   campos: Campo[]
 }
@@ -118,9 +116,6 @@ export interface RegistroBitacora {
   usuario: string
   modulo: string
   accion: string
-  entidad: string | null
-  idEntidad: string | null
-  detalle: string | null
 }
 
 export interface Resumen {

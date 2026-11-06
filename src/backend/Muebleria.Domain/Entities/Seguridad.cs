@@ -32,21 +32,19 @@ public class Usuario : IAuditable
     public string Nombre { get; set; } = "";
     /// <summary>Nombre de acceso (columna "usuario" del diccionario de datos).</summary>
     public string NombreUsuario { get; set; } = "";
+    /// <summary>Columna "contrasena" del diagrama ER. Guarda solo el hash PBKDF2, nunca el texto (RNF-01).</summary>
     public string ContrasenaHash { get; set; } = "";
     public bool Activo { get; set; } = true;
-    public DateTime FechaCreacion { get; set; }
 }
 
+/// <summary>Tabla 9 del diccionario de datos: exactamente usuario, módulo, acción y fecha-hora (RF-03).</summary>
 public class Bitacora
 {
-    public long Id { get; set; }
+    public int Id { get; set; }
     public int UsuarioId { get; set; }
     public Usuario Usuario { get; set; } = null!;
     public string Modulo { get; set; } = "";
     public string Accion { get; set; } = "";
-    public string? Entidad { get; set; }
-    public string? IdEntidad { get; set; }
-    public string? Detalle { get; set; }
     public DateTime FechaHora { get; set; }
 }
 

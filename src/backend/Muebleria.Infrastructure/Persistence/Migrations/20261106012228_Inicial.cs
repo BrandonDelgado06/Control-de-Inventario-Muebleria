@@ -17,9 +17,8 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                 {
                     id_categoria = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    nombre = table.Column<string>(type: "nvarchar(60)", maxLength: 60, nullable: false),
-                    tipo_inventario = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    activo = table.Column<bool>(type: "bit", nullable: false)
+                    nombre = table.Column<string>(type: "varchar(60)", unicode: false, maxLength: 60, nullable: false),
+                    tipo_inventario = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -30,9 +29,9 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                 name: "CONFIGURACION",
                 columns: table => new
                 {
-                    clave = table.Column<string>(type: "nvarchar(60)", maxLength: 60, nullable: false),
-                    valor = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    descripcion = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true)
+                    clave = table.Column<string>(type: "varchar(60)", unicode: false, maxLength: 60, nullable: false),
+                    valor = table.Column<string>(type: "varchar(200)", unicode: false, maxLength: 200, nullable: false),
+                    descripcion = table.Column<string>(type: "varchar(200)", unicode: false, maxLength: 200, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -45,8 +44,8 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                 {
                     id_permiso = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    codigo = table.Column<string>(type: "nvarchar(60)", maxLength: 60, nullable: false),
-                    descripcion = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false)
+                    codigo = table.Column<string>(type: "varchar(60)", unicode: false, maxLength: 60, nullable: false),
+                    descripcion = table.Column<string>(type: "varchar(150)", unicode: false, maxLength: 150, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -59,7 +58,7 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                 {
                     id_rol = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    nombre = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false)
+                    nombre = table.Column<string>(type: "varchar(30)", unicode: false, maxLength: 30, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -72,8 +71,8 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                 {
                     id_ubicacion = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    nombre = table.Column<string>(type: "nvarchar(60)", maxLength: 60, nullable: false),
-                    descripcion = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
+                    nombre = table.Column<string>(type: "varchar(60)", unicode: false, maxLength: 60, nullable: false),
+                    descripcion = table.Column<string>(type: "varchar(150)", unicode: false, maxLength: 150, nullable: true),
                     activo = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -88,10 +87,10 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     id_campo_personalizado = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     id_categoria = table.Column<int>(type: "int", nullable: false),
-                    nombre = table.Column<string>(type: "nvarchar(60)", maxLength: 60, nullable: false),
-                    tipo_dato = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    nombre = table.Column<string>(type: "varchar(60)", unicode: false, maxLength: 60, nullable: false),
+                    tipo_dato = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: false),
                     obligatorio = table.Column<bool>(type: "bit", nullable: false),
-                    opciones = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    opciones = table.Column<string>(type: "varchar(500)", unicode: false, maxLength: 500, nullable: true),
                     orden = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -136,11 +135,10 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     id_usuario = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     id_rol = table.Column<int>(type: "int", nullable: false),
-                    nombre = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    usuario = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
-                    contrasena_hash = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
-                    activo = table.Column<bool>(type: "bit", nullable: false),
-                    fecha_creacion = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "SYSDATETIME()")
+                    nombre = table.Column<string>(type: "varchar(100)", unicode: false, maxLength: 100, nullable: false),
+                    usuario = table.Column<string>(type: "varchar(30)", unicode: false, maxLength: 30, nullable: false),
+                    contrasena = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: false),
+                    activo = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -159,18 +157,18 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                 {
                     id_articulo = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    codigo = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
-                    nombre = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    codigo = table.Column<string>(type: "varchar(30)", unicode: false, maxLength: 30, nullable: false),
+                    nombre = table.Column<string>(type: "varchar(100)", unicode: false, maxLength: 100, nullable: false),
                     id_categoria = table.Column<int>(type: "int", nullable: false),
                     id_ubicacion = table.Column<int>(type: "int", nullable: false),
-                    unidad_medida = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    unidad_medida = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: false),
                     stock_actual = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false, defaultValue: 0m),
                     stock_minimo = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false, defaultValue: 0m),
-                    estado = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    lote = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: true),
+                    estado = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: false, defaultValueSql: "'Buena'"),
+                    lote = table.Column<string>(type: "varchar(30)", unicode: false, maxLength: 30, nullable: true),
                     fecha_vencimiento = table.Column<DateOnly>(type: "date", nullable: true),
-                    presentacion = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    foto_ruta = table.Column<string>(type: "nvarchar(260)", maxLength: 260, nullable: true),
+                    presentacion = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: true),
+                    foto_ruta = table.Column<string>(type: "varchar(260)", unicode: false, maxLength: 260, nullable: true),
                     activo = table.Column<bool>(type: "bit", nullable: false),
                     version = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
                 },
@@ -197,15 +195,12 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                 name: "BITACORA",
                 columns: table => new
                 {
-                    id_bitacora = table.Column<long>(type: "bigint", nullable: false)
+                    id_bitacora = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     id_usuario = table.Column<int>(type: "int", nullable: false),
-                    modulo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    accion = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    entidad = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    id_entidad = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    detalle = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    fecha_hora = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "SYSDATETIME()")
+                    modulo = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
+                    accion = table.Column<string>(type: "varchar(100)", unicode: false, maxLength: 100, nullable: false),
+                    fecha_hora = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETDATE()")
                 },
                 constraints: table =>
                 {
@@ -228,7 +223,7 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     id_ubicacion = table.Column<int>(type: "int", nullable: true),
                     id_categoria = table.Column<int>(type: "int", nullable: true),
                     id_responsable = table.Column<int>(type: "int", nullable: false),
-                    estado = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
+                    estado = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -259,8 +254,8 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                 {
                     id_respaldo = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    archivo = table.Column<string>(type: "nvarchar(260)", maxLength: 260, nullable: false),
-                    fecha_hora = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    archivo = table.Column<string>(type: "varchar(260)", unicode: false, maxLength: 260, nullable: false),
+                    fecha_hora = table.Column<DateTime>(type: "datetime", nullable: false),
                     id_usuario = table.Column<int>(type: "int", nullable: false),
                     tamano_bytes = table.Column<long>(type: "bigint", nullable: false)
                 },
@@ -282,7 +277,7 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     id_articulo_alias = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     id_articulo = table.Column<int>(type: "int", nullable: false),
-                    alias = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                    alias = table.Column<string>(type: "varchar(100)", unicode: false, maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -301,7 +296,7 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                 {
                     id_articulo = table.Column<int>(type: "int", nullable: false),
                     id_campo = table.Column<int>(type: "int", nullable: false),
-                    valor = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false)
+                    valor = table.Column<string>(type: "varchar(200)", unicode: false, maxLength: 200, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -327,10 +322,10 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     id_historial_estado = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     id_articulo = table.Column<int>(type: "int", nullable: false),
-                    estado_anterior = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    estado_nuevo = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    estado_anterior = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: false),
+                    estado_nuevo = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: false),
                     id_usuario = table.Column<int>(type: "int", nullable: false),
-                    fecha_hora = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "SYSDATETIME()")
+                    fecha_hora = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETDATE()")
                 },
                 constraints: table =>
                 {
@@ -357,13 +352,12 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     id_articulo = table.Column<int>(type: "int", nullable: false),
                     id_usuario = table.Column<int>(type: "int", nullable: false),
-                    tipo = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    tipo = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: false),
                     cantidad = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
+                    motivo = table.Column<string>(type: "varchar(150)", unicode: false, maxLength: 150, nullable: false),
+                    fecha_hora = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETDATE()"),
                     stock_anterior = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
-                    stock_nuevo = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
-                    motivo = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    fecha_hora = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "SYSDATETIME()"),
-                    id_referencia = table.Column<int>(type: "int", nullable: true)
+                    stock_nuevo = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -391,17 +385,15 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     id_articulo = table.Column<int>(type: "int", nullable: false),
                     id_responsable = table.Column<int>(type: "int", nullable: false),
-                    cantidad = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
-                    destino = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    destino = table.Column<string>(type: "varchar(150)", unicode: false, maxLength: 150, nullable: false),
                     fecha_salida = table.Column<DateOnly>(type: "date", nullable: false),
                     fecha_prevista = table.Column<DateOnly>(type: "date", nullable: false),
                     fecha_devolucion = table.Column<DateOnly>(type: "date", nullable: true),
-                    estado_devolucion = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true)
+                    estado_devolucion = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SALIDA_HERRAMIENTA", x => x.id_salida);
-                    table.CheckConstraint("CK_SALIDA_HERRAMIENTA_cantidad", "[cantidad] > 0");
                     table.CheckConstraint("CK_SALIDA_HERRAMIENTA_fechas", "[fecha_prevista] >= [fecha_salida]");
                     table.ForeignKey(
                         name: "FK_SALIDA_HERRAMIENTA_ARTICULO_id_articulo",
@@ -427,12 +419,12 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     id_solicitante = table.Column<int>(type: "int", nullable: false),
                     id_aprobador = table.Column<int>(type: "int", nullable: true),
                     cantidad = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
-                    motivo = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    motivo_rechazo = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
-                    estado = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    fecha_solicitud = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "SYSDATETIME()"),
-                    fecha_resolucion = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    fecha_entrega = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    estado = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: false, defaultValueSql: "'Pendiente'"),
+                    fecha_solicitud = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETDATE()"),
+                    fecha_resolucion = table.Column<DateTime>(type: "datetime", nullable: true),
+                    motivo = table.Column<string>(type: "varchar(150)", unicode: false, maxLength: 150, nullable: false),
+                    motivo_rechazo = table.Column<string>(type: "varchar(150)", unicode: false, maxLength: 150, nullable: true),
+                    fecha_entrega = table.Column<DateTime>(type: "datetime", nullable: true)
                 },
                 constraints: table =>
                 {

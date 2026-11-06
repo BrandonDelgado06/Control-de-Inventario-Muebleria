@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Alert, Box, Button, Checkbox, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControlLabel,
-  IconButton, MenuItem, Paper, Stack, Switch, TextField, Typography,
+  IconButton, MenuItem, Paper, Stack, TextField, Typography,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteOutlined from '@mui/icons-material/DeleteOutlined'
@@ -20,9 +20,8 @@ const nombreTipoDato: Record<TipoDato, string> = { Texto: 'Texto', Numero: 'Núm
 export function CategoriasPage() {
   const { tiene } = useAuth()
   const puedeEditar = tiene(Permisos.CatalogosGestionar)
-  const [inactivas, setInactivas] = useState(false)
   const [editando, setEditando] = useState<Categoria | 'nueva' | null>(null)
-  const { data, isLoading } = useCategorias(inactivas)
+  const { data, isLoading } = useCategorias()
 
   return (
     <Pagina
@@ -30,15 +29,14 @@ export function CategoriasPage() {
       subtitulo="Cada categoría puede pedir sus propios datos: número de grano, espesor, especie de madera…"
       acciones={puedeEditar && <Button variant="contained" startIcon={<AddIcon />} onClick={() => setEditando('nueva')}>Nueva categoría</Button>}
     >
-      <FormControlLabel control={<Checkbox id="inactivas" checked={inactivas} onChange={(e) => setInactivas(e.target.checked)} />} label="Incluir desactivadas" />
       {isLoading ? <Cargando /> : !data?.length ? <Vacio>No hay categorías.</Vacio> : (
         <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
           {data.map((c) => (
-            <Paper key={c.id} sx={{ p: 2, display: 'grid', gap: 1.5, alignContent: 'start', opacity: c.activo ? 1 : 0.55 }}>
+            <Paper key={c.id} sx={{ p: 2, display: 'grid', gap: 1.5, alignContent: 'start' }}>
               <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
                 <Box>
                   <Typography variant="h2">{c.nombre}</Typography>
-                  <Typography variant="body2" color="text.secondary">{nombreTipoInventario[c.tipoInventario]} · {c.cantidadArticulos} artículo(s){!c.activo && ' · desactivada'}</Typography>
+                  <Typography variant="body2" color="text.secondary">{nombreTipoInventario[c.tipoInventario]} · {c.cantidadArticulos} artículo(s)</Typography>
                 </Box>
                 {puedeEditar && <Button size="small" onClick={() => setEditando(c)}>Editar</Button>}
               </Stack>
@@ -67,7 +65,6 @@ function CategoriaDialog({ categoria, onClose }: { categoria?: Categoria; onClos
   const notificar = useNotificar()
   const [nombre, setNombre] = useState(categoria?.nombre ?? '')
   const [tipo, setTipo] = useState<TipoInventario>(categoria?.tipoInventario ?? 'MateriaPrima')
-  const [activo, setActivo] = useState(categoria?.activo ?? true)
   const [campos, setCampos] = useState<CampoForm[]>(
     (categoria?.campos ?? []).map((c) => ({ clave: c.id, id: c.id, nombre: c.nombre, tipoDato: c.tipoDato, obligatorio: c.obligatorio, opciones: c.opciones.join(', ') })),
   )
@@ -77,7 +74,7 @@ function CategoriaDialog({ categoria, onClose }: { categoria?: Categoria; onClos
   const guardar = useMutation({
     mutationFn: () => {
       const cuerpo = {
-        nombre, tipoInventario: tipo, activo,
+        nombre, tipoInventario: tipo,
         campos: campos.map((c) => ({
           id: c.id ?? null, nombre: c.nombre, tipoDato: c.tipoDato, obligatorio: c.obligatorio,
           opciones: c.tipoDato === 'Lista' ? c.opciones.split(',').map((o) => o.trim()).filter(Boolean) : null,
@@ -105,7 +102,6 @@ function CategoriaDialog({ categoria, onClose }: { categoria?: Categoria; onClos
               {Object.entries(nombreTipoInventario).map(([k, v]) => <MenuItem key={k} value={k}>{v}</MenuItem>)}
             </TextField>
           </Box>
-          {categoria && <FormControlLabel control={<Switch id="activo" checked={activo} onChange={(e) => setActivo(e.target.checked)} />} label="Activa" />}
 
           <Divider textAlign="left"><Typography variant="caption" color="text.secondary">Campos personalizados</Typography></Divider>
           {campos.length === 0 && <Typography variant="body2" color="text.secondary">Esta categoría no pide datos adicionales.</Typography>}
