@@ -103,6 +103,7 @@ internal class CampoPersonalizadoConfig : IEntityTypeConfiguration<CampoPersonal
 {
     public void Configure(EntityTypeBuilder<CampoPersonalizado> b)
     {
+        b.Property(x => x.Id).HasColumnName("id_campo"); // mismo nombre que la FK en ARTICULO_VALOR_CAMPO
         b.Property(x => x.Nombre).HasMaxLength(60).IsRequired();
         b.Property(x => x.Opciones).HasMaxLength(500);
         b.HasIndex(x => new { x.CategoriaId, x.Nombre }).IsUnique();

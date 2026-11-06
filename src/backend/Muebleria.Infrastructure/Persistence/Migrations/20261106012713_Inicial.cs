@@ -84,7 +84,7 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                 name: "CAMPO_PERSONALIZADO",
                 columns: table => new
                 {
-                    id_campo_personalizado = table.Column<int>(type: "int", nullable: false)
+                    id_campo = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     id_categoria = table.Column<int>(type: "int", nullable: false),
                     nombre = table.Column<string>(type: "varchar(60)", unicode: false, maxLength: 60, nullable: false),
@@ -95,7 +95,7 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CAMPO_PERSONALIZADO", x => x.id_campo_personalizado);
+                    table.PrimaryKey("PK_CAMPO_PERSONALIZADO", x => x.id_campo);
                     table.ForeignKey(
                         name: "FK_CAMPO_PERSONALIZADO_CATEGORIA_id_categoria",
                         column: x => x.id_categoria,
@@ -311,7 +311,7 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                         name: "FK_ARTICULO_VALOR_CAMPO_CAMPO_PERSONALIZADO_id_campo",
                         column: x => x.id_campo,
                         principalTable: "CAMPO_PERSONALIZADO",
-                        principalColumn: "id_campo_personalizado",
+                        principalColumn: "id_campo",
                         onDelete: ReferentialAction.Restrict);
                 });
 

@@ -12,7 +12,7 @@ using Muebleria.Infrastructure.Persistence;
 namespace Muebleria.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261106012228_Inicial")]
+    [Migration("20261106012713_Inicial")]
     partial class Inicial
     {
         /// <inheritdoc />
@@ -238,7 +238,7 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasColumnName("id_campo_personalizado");
+                        .HasColumnName("id_campo");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
