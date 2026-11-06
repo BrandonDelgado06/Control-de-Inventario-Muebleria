@@ -50,11 +50,16 @@ dotnet tool install --global dotnet-ef 2>$null
 
 # --- Frontend -----------------------------------------------------------------
 # Vite no acepta carpetas con archivos, así que se genera aparte y se copia.
+# create-vite no acepta rutas absolutas de Windows: se ejecuta dentro de TEMP con un nombre relativo.
 $tmp = Join-Path $env:TEMP 'muebleria-vite'
 if (Test-Path $tmp) { Remove-Item $tmp -Recurse -Force }
-npm create vite@latest $tmp -- --template react-ts --no-interactive
+Push-Location $env:TEMP
+npm create vite@latest muebleria-vite -- --template react-ts --no-interactive
+Pop-Location
 robocopy $tmp 'src/frontend' /E /NFL /NDL /NJH /NJS | Out-Null
 Remove-Item $tmp -Recurse -Force
+(Get-Content 'src/frontend/package.json' -Raw) -replace '"name": "[^"]*"', '"name": "muebleria-frontend"' |
+  Set-Content 'src/frontend/package.json' -Encoding utf8 -NoNewline
 
 Push-Location 'src/frontend'
 npm install

@@ -61,3 +61,18 @@ La cadena de conexión local se guarda con *user secrets*, nunca en el repositor
 ```powershell
 dotnet user-secrets set "ConnectionStrings:Inventario" "Server=.\SQLEXPRESS;Database=MuebleriaInventario;Trusted_Connection=True;TrustServerCertificate=True" --project src\backend\Muebleria.Api
 ```
+
+## Qué pasa al arrancar la API en desarrollo
+
+- Aplica las migraciones pendientes y crea la base `MuebleriaInventario` si no existe.
+- Crea los roles, los permisos, la configuración y el usuario `admin`.
+- Con `Seed:DatosEjemplo = true` (solo en `appsettings.Development.json`) agrega los usuarios de prueba `encargado` y `trabajador`, 4 ubicaciones, 7 categorías con campos personalizados y 14 artículos del taller.
+- Las contraseñas de prueba están en `src/backend/Muebleria.Api/appsettings.Development.json`, sección `Seed`. En producción no se crean datos de ejemplo y la contraseña del administrador se define en `appsettings.Production.json` del servidor.
+
+Para empezar desde cero, borra la base de datos y vuelve a arrancar la API:
+
+```powershell
+sqlcmd -S . -E -C -Q "DROP DATABASE MuebleriaInventario"
+```
+
+Documentación de la API (solo en desarrollo): http://localhost:5000/scalar

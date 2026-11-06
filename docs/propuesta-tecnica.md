@@ -22,7 +22,7 @@ Este documento traduce el documento del proyecto (39 RF y 9 RNF) en decisiones d
 | Autenticación | Cookie de autenticación de ASP.NET Core (HttpOnly, SameSite=Strict, expiración deslizante de 30 min) | Cubre el cierre por inactividad de RF-01. Como la SPA se sirve desde el mismo origen, no hace falta JWT. |
 | Contraseñas | `PasswordHasher<T>` de ASP.NET Core (PBKDF2) | RNF-01. Sin instalar Identity completo. |
 | Autorización | Políticas por permiso (`[Authorize(Policy = "Articulos.Editar")]`) | RNF-02: se valida en el servidor, no solo se oculta el menú. |
-| Validación | FluentValidation (backend) + Zod (frontend) | RNF-03. |
+| Validación | DataAnnotations en los DTO (backend) y reglas de negocio en los servicios; el frontend muestra los mensajes que devuelve la API | RNF-03. Los mensajes de error están en español. |
 | Reportes | **QuestPDF** (PDF) y **ClosedXML** (Excel) | RF-35. Revisar la licencia de QuestPDF (gratuita para uso académico / empresas pequeñas). |
 | Frontend | **React 19 + TypeScript + Vite** | |
 | UI | Material UI (MUI) + MUI X DataGrid + MUI X Charts | Tablas con filtros y gráficos del panel (RF-37) sin depender de internet. |
