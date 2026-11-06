@@ -1,4 +1,4 @@
-# Genera la solución .NET y el proyecto React (Sprint 0).
+﻿# Genera la solución .NET y el proyecto React (Sprint 0).
 # Requisitos: SDK de .NET 10 y Node.js 22+.
 # Uso (desde la raíz del repositorio):  powershell -ExecutionPolicy Bypass -File scripts\crear-proyectos.ps1
 

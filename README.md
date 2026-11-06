@@ -18,6 +18,14 @@ Proyecto final de **ISB-32 Programación Avanzada**, Universidad Internacional S
 - [Guía de trabajo en GitHub](CONTRIBUTING.md): ramas, commits, PR y configuración del repositorio.
 - Diagramas: [casos de uso](docs/diagramas/casos-de-uso.png) · [entidad-relación](docs/diagramas/entidad-relacion.png)
 
+## Probar el sistema
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\iniciar.ps1
+```
+
+Abre dos ventanas, **Inventario - API** e **Inventario - Web**, y luego el navegador en http://localhost:5173. Para detener el sistema, cierra esas dos ventanas. Los usuarios de prueba son `admin`, `encargado` y `trabajador`; sus contraseñas están en `src/backend/Muebleria.Api/appsettings.Development.json`, en la sección `Seed`.
+
 ## Requisitos
 
 | Herramienta | Versión |
