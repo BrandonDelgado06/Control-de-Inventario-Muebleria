@@ -32,7 +32,20 @@ Antes de la entrega final hay dos avances. Los sprints se acomodan a ellos:
 | Movimientos | RF-19, RF-20, RF-21, RF-22, RNF-06 | Entradas, salidas (no permite stock negativo), ajustes solo del administrador e historial |
 | Panel | RF-36 (inicial) | Totales, artículos bajo el mínimo y últimos movimientos |
 
-**Queda para después:** fotografía del artículo (la columna ya existe), RF-11 en pantalla (el historial de estado ya se guarda), herramientas de instalación (RF-16 a 18), solicitudes, bajas y mermas, inventario físico, alertas, reportes y respaldos.
+**Queda para después:** fotografía del artículo (la columna ya existe), RF-11 en pantalla (el historial de estado ya se guarda), bajas y mermas (RF-26, RF-27) e inventario físico (RF-28, RF-29).
+
+### Agregado después del avance 1 (rama `feature/RF-23-39-solicitudes-alertas-reportes-respaldos`)
+
+| Módulo | RF | Estado |
+|---|---|---|
+| Solicitudes de materiales | RF-23, RF-24, RF-25 | Hecho |
+| Herramientas de instalación | RF-16, RF-17, RF-18 | Hecho |
+| Alertas | RF-30, RF-31, RF-32 (+ aviso de respaldo, RNF-07) | Hecho |
+| Reportes con PDF y Excel | RF-33, RF-34, RF-35 | Hecho |
+| Panel principal | RF-36, RF-37 | Hecho |
+| Respaldo y restauración | RF-38, RF-39 | Hecho |
+
+El diseño de estos módulos está en [diseno-modulos-control.md](diseno-modulos-control.md).
 
 ## Resumen
 
