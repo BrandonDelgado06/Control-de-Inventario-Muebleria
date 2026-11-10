@@ -53,7 +53,7 @@ public class RespaldoService(IAppDbContext db, IRespaldos respaldos, IUsuarioAct
             db.Bitacoras.Add(new Bitacora
             {
                 UsuarioId = usuario, Modulo = "Respaldos", FechaHora = DateTime.Now,
-                Accion = $"Restaurar {Path.GetFileName(elegido.Archivo)} (copia previa: {Path.GetFileName(previo.Archivo)})",
+                Accion = $"Restaurar respaldo #{elegido.Id} del {elegido.Fecha:dd/MM/yyyy HH:mm} (copia previa #{previo.Id})",
             });
             await db.SaveChangesAsync(ct);
         }

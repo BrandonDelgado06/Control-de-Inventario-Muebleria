@@ -7,8 +7,11 @@ using Muebleria.Domain.Exceptions;
 namespace Muebleria.Api.Middleware;
 
 /// <summary>Convierte excepciones en respuestas ProblemDetails con mensajes en español.</summary>
-public class ManejadorErrores(IProblemDetailsService problemas, ILogger<ManejadorErrores> log) : IExceptionHandler
+public class ManejadorErrores(IProblemDetailsService problemas, ILogger<ManejadorErrores> log, IHostEnvironment entorno) : IExceptionHandler
 {
+    /// <summary>Solo en desarrollo y en pruebas se muestra el detalle técnico del error; en el taller, nunca.</summary>
+    private bool MostrarDetalle => entorno.IsDevelopment() || entorno.IsEnvironment("Pruebas");
+
     public async ValueTask<bool> TryHandleAsync(HttpContext ctx, Exception ex, CancellationToken ct)
     {
         var (estado, titulo) = ex switch
@@ -27,7 +30,7 @@ public class ManejadorErrores(IProblemDetailsService problemas, ILogger<Manejado
         {
             HttpContext = ctx,
             Exception = ex,
-            ProblemDetails = new ProblemDetails { Status = estado, Title = titulo },
+            ProblemDetails = new ProblemDetails { Status = estado, Title = titulo, Detail = estado == 500 && MostrarDetalle ? ex.ToString() : null },
         });
     }
 }
