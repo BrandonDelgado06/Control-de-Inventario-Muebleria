@@ -42,3 +42,6 @@ database/backups/*
 !.vscode/settings.json
 Thumbs.db
 .DS_Store
+
+# Claves de sesión de ASP.NET Core (se generan en cada equipo)
+src/backend/Muebleria.Api/App_Data/
