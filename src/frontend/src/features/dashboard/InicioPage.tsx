@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link as RouterLink } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
-import { Box, Button, Link, Paper, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
+import { alpha, Box, Button, Link, Paper, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography, useTheme } from '@mui/material'
 import { BarChart } from '@mui/x-charts/BarChart'
 import Inventory2Outlined from '@mui/icons-material/Inventory2Outlined'
 import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined'
@@ -25,7 +25,7 @@ function Indicador({ valor, texto, detalle, icono, tono, a }: {
 }) {
   const contenido = (
     <Stack direction="row" spacing={1.5} sx={{ alignItems: 'flex-start' }}>
-      <Box sx={{ p: 1, borderRadius: 1.5, display: 'flex', bgcolor: tono ? `${tono}.light` : 'rgba(31,111,92,0.10)', color: tono ? `${tono}.dark` : 'primary.main', opacity: tono ? 0.9 : 1 }}>{icono}</Box>
+      <Box sx={{ p: 1, borderRadius: 1.5, display: 'flex', bgcolor: (t) => alpha(tono ? t.palette[tono].main : t.palette.primary.main, 0.15), color: tono ? `${tono}.main` : 'primary.main' }}>{icono}</Box>
       <Box sx={{ minWidth: 0 }}>
         <Typography sx={{ fontSize: '1.9rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>{fmtNumero(valor)}</Typography>
         <Typography color="text.secondary" sx={{ lineHeight: 1.3 }}>{texto}</Typography>
@@ -43,6 +43,7 @@ function Indicador({ valor, texto, detalle, icono, tono, a }: {
 
 export function InicioPage() {
   const { sesion, tiene } = useAuth()
+  const theme = useTheme()
   const { data, isLoading } = useQuery({ queryKey: ['panel'], queryFn: async () => (await api.get<Resumen>('/panel')).data })
   const fecha = new Intl.DateTimeFormat('es-CR', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())
 
@@ -74,11 +75,12 @@ export function InicioPage() {
               <Typography variant="body2" color="text.secondary">Salidas por categoría en los últimos 30 días (RF-37).</Typography>
               {data.consumoPorCategoria.length === 0 ? <Vacio>Todavía no hay salidas en los últimos 30 días.</Vacio> : (
                 <BarChart
+                  key={theme.palette.mode}   // el gráfico guarda sus colores al montarse: se redibuja al cambiar de modo
                   height={260}
                   dataset={data.consumoPorCategoria}
                   xAxis={[{ scaleType: 'band', dataKey: 'categoria', tickLabelStyle: { fontSize: 12 }, categoryGapRatio: data.consumoPorCategoria.length < 4 ? 0.7 : 0.3 }]}
                   yAxis={[{ tickMinStep: 1 }]}
-                  series={[{ dataKey: 'salidas', label: 'Salidas', color: '#1F6F5C' }]}
+                  series={[{ dataKey: 'salidas', label: 'Salidas', color: theme.palette.primary.main }]}
                   hideLegend
                   margin={{ left: 0, right: 10, top: 20, bottom: 10 }}
                   borderRadius={6}

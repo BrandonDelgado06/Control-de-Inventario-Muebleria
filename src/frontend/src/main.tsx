@@ -2,11 +2,10 @@ import { StrictMode, type ReactNode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { CssBaseline, ThemeProvider } from '@mui/material'
 import '@fontsource/roboto/400.css'
 import '@fontsource/roboto/500.css'
 import '@fontsource/roboto/700.css'
-import { tema } from './app/tema'
+import { ModoTemaProvider } from './app/ModoTema'
 import { AuthProvider, useAuth } from './app/AuthContext'
 import { Layout } from './app/Layout'
 import { NotificacionesProvider } from './components/Notificaciones'
@@ -68,8 +67,7 @@ function App() {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider theme={tema}>
-      <CssBaseline />
+    <ModoTemaProvider>
       <QueryClientProvider client={queryClient}>
         <NotificacionesProvider>
           <BrowserRouter>
@@ -79,6 +77,6 @@ createRoot(document.getElementById('root')!).render(
           </BrowserRouter>
         </NotificacionesProvider>
       </QueryClientProvider>
-    </ThemeProvider>
+    </ModoTemaProvider>
   </StrictMode>,
 )

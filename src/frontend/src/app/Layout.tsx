@@ -20,6 +20,8 @@ import AssessmentOutlined from '@mui/icons-material/AssessmentOutlined'
 import BackupOutlined from '@mui/icons-material/BackupOutlined'
 import LogoutOutlined from '@mui/icons-material/LogoutOutlined'
 import { useAuth } from './AuthContext'
+import { BotonModo } from './ModoTema'
+import { fondoPrimario } from './tema'
 import { api } from '../api/cliente'
 import { Permisos, type ResumenAlertas } from '../api/tipos'
 
@@ -106,7 +108,7 @@ export function Layout() {
                     key={i.a} component={NavLink} to={i.a} end={i.a === '/'}
                     selected={i.a === '/' ? pathname === '/' : pathname.startsWith(i.a)}
                     onClick={() => setAbierto(false)}
-                    sx={{ mx: 1, borderRadius: 1.5, '&.Mui-selected': { bgcolor: 'rgba(31,111,92,0.12)', color: 'primary.main' } }}
+                    sx={{ mx: 1, borderRadius: 1.5, '&.Mui-selected': { bgcolor: fondoPrimario(0.14), color: 'primary.main' }, '&.Mui-selected:hover': { bgcolor: fondoPrimario(0.2) } }}
                   >
                     <ListItemIcon sx={{ minWidth: 36, color: 'inherit' }}>{i.icono}</ListItemIcon>
                     <ListItemText primary={i.texto} />
@@ -132,6 +134,7 @@ export function Layout() {
         <Toolbar sx={{ gap: 1 }}>
           {!escritorio && <IconButton edge="start" onClick={() => setAbierto(true)} aria-label="Abrir menú"><MenuIcon /></IconButton>}
           <Box sx={{ flex: 1 }} />
+          <BotonModo />
           {tiene(Permisos.AlertasVer) && (
             <Tooltip title={totalAlertas ? `${totalAlertas} alertas activas` : 'Sin alertas'}>
               <IconButton onClick={() => navegar('/alertas')} aria-label="Ver alertas">
@@ -153,7 +156,7 @@ export function Layout() {
 
       <Box component="nav" sx={{ width: { md: ANCHO }, flexShrink: { md: 0 } }}>
         <Drawer variant={escritorio ? 'permanent' : 'temporary'} open={escritorio || abierto} onClose={() => setAbierto(false)}
-          slotProps={{ paper: { sx: { width: ANCHO, boxSizing: 'border-box', bgcolor: '#FAFBF9' } } }}>
+          slotProps={{ paper: { sx: { width: ANCHO, boxSizing: 'border-box' } } }}>
           {menu}
         </Drawer>
       </Box>
