@@ -9,25 +9,34 @@ on:
 jobs:
   backend:
     runs-on: ubuntu-latest
+    # SQL Server 2022 en un contenedor para las pruebas de integración (misma versión que el taller en desarrollo).
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_SA_PASSWORD: "Ci_Pruebas_2026!"
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'Ci_Pruebas_2026!' -C -Q 'SELECT 1' || exit 1"
+          --health-interval 10s --health-timeout 5s --health-retries 12
+    env:
+      # Solo para el contenedor efímero del CI.
+      PRUEBAS_SQL: "Server=localhost,1433;Database=MuebleriaInventario_Pruebas;User Id=sa;Password=Ci_Pruebas_2026!;TrustServerCertificate=True"
     steps:
       - uses: actions/checkout@v4
-      - name: ¿Existe la solución?
-        id: check
-        run: |
-          if ls src/backend/*.slnx >/dev/null 2>&1; then echo "existe=true" >> "$GITHUB_OUTPUT"; else echo "existe=false" >> "$GITHUB_OUTPUT"; fi
       - uses: actions/setup-dotnet@v4
-        if: steps.check.outputs.existe == 'true'
         with:
           global-json-file: global.json
       - name: Restaurar
-        if: steps.check.outputs.existe == 'true'
-        run: dotnet restore src/backend
+        run: dotnet restore src/backend/Muebleria.Inventario.slnx
       - name: Compilar
-        if: steps.check.outputs.existe == 'true'
-        run: dotnet build src/backend --no-restore -c Release
+        run: dotnet build src/backend/Muebleria.Inventario.slnx --no-restore -c Release
       - name: Pruebas unitarias
-        if: steps.check.outputs.existe == 'true' && hashFiles('tests/Muebleria.UnitTests/*.csproj') != ''
-        run: dotnet test tests/Muebleria.UnitTests -c Release
+        run: dotnet test tests/Muebleria.UnitTests --no-build -c Release --logger "console;verbosity=normal"
+      - name: Pruebas de integración (API + SQL Server)
+        run: dotnet test tests/Muebleria.IntegrationTests --no-build -c Release --logger "console;verbosity=normal"
 
   frontend:
     runs-on: ubuntu-latest
@@ -36,19 +45,12 @@ jobs:
         working-directory: src/frontend
     steps:
       - uses: actions/checkout@v4
-      - name: ¿Existe package.json?
-        id: check
-        run: |
-          if [ -f package.json ]; then echo "existe=true" >> "$GITHUB_OUTPUT"; else echo "existe=false" >> "$GITHUB_OUTPUT"; fi
       - uses: actions/setup-node@v4
-        if: steps.check.outputs.existe == 'true'
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: src/frontend/package-lock.json
-      - if: steps.check.outputs.existe == 'true'
-        run: npm ci
-      - if: steps.check.outputs.existe == 'true'
-        run: npm run lint
-      - if: steps.check.outputs.existe == 'true'
-        run: npm run build
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
