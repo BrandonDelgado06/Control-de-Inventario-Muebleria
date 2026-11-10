@@ -28,6 +28,8 @@ public interface IAppDbContext
 
     DatabaseFacade Database { get; }
     Task<int> SaveChangesAsync(CancellationToken ct = default);
+    /// <summary>Descarta las entidades en memoria (por ejemplo, después de restaurar la base).</summary>
+    void OlvidarCambios();
 }
 
 /// <summary>Usuario que hace la petición actual; null fuera de una petición (p. ej. datos semilla).</summary>
