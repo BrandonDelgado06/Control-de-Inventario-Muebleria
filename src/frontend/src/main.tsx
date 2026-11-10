@@ -21,6 +21,11 @@ import { UbicacionesPage } from './features/ubicaciones/UbicacionesPage'
 import { CategoriasPage } from './features/catalogo/CategoriasPage'
 import { UsuariosPage } from './features/usuarios/UsuariosPage'
 import { BitacoraPage } from './features/bitacora/BitacoraPage'
+import { SolicitudesPage } from './features/solicitudes/SolicitudesPage'
+import { InstalacionPage } from './features/instalacion/InstalacionPage'
+import { AlertasPage } from './features/alertas/AlertasPage'
+import { ReportesPage } from './features/reportes/ReportesPage'
+import { RespaldosPage } from './features/respaldos/RespaldosPage'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false, staleTime: 15_000 } },
@@ -50,6 +55,11 @@ function App() {
         <Route path="categorias" element={<Protegida permiso={Permisos.ArticulosVer}><CategoriasPage /></Protegida>} />
         <Route path="usuarios" element={<Protegida permiso={Permisos.UsuariosGestionar}><UsuariosPage /></Protegida>} />
         <Route path="bitacora" element={<Protegida permiso={Permisos.BitacoraVer}><BitacoraPage /></Protegida>} />
+        <Route path="solicitudes" element={<Protegida permiso={Permisos.SolicitudesCrear}><SolicitudesPage /></Protegida>} />
+        <Route path="instalacion" element={<Protegida permiso={Permisos.HerramientasPrestar}><InstalacionPage /></Protegida>} />
+        <Route path="alertas" element={<Protegida permiso={Permisos.AlertasVer}><AlertasPage /></Protegida>} />
+        <Route path="reportes" element={<Protegida permiso={Permisos.ReportesVer}><ReportesPage /></Protegida>} />
+        <Route path="respaldos" element={<Protegida permiso={Permisos.RespaldosGestionar}><RespaldosPage /></Protegida>} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

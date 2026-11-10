@@ -122,9 +122,112 @@ export interface Resumen {
   totalArticulos: number
   bajoMinimo: number
   porVencer: number
+  herramientasFuera: number
+  herramientasAtrasadas: number
+  solicitudesPendientes: number
   movimientosHoy: number
+  alertasActivas: number
   articulosBajoMinimo: ArticuloResumen[]
   ultimosMovimientos: Movimiento[]
+  consumoPorCategoria: { categoria: string; salidas: number }[]
+}
+
+// ---------------------------------------------------------------- Solicitudes (RF-23 a RF-25)
+export type EstadoSolicitud = 'Pendiente' | 'Aprobada' | 'Rechazada' | 'Entregada'
+
+export interface Solicitud {
+  id: number
+  articuloId: number
+  codigo: string
+  articulo: string
+  unidadMedida: string
+  stockActual: number
+  cantidad: number
+  motivo: string
+  estado: EstadoSolicitud
+  solicitanteId: number
+  solicitante: string
+  aprobador: string | null
+  motivoRechazo: string | null
+  fechaSolicitud: string
+  fechaResolucion: string | null
+  fechaEntrega: string | null
+}
+
+// ---------------------------------------------------------------- Herramientas de instalación (RF-16 a RF-18)
+export interface SalidaHerramienta {
+  id: number
+  articuloId: number
+  codigo: string
+  herramienta: string
+  responsableId: number
+  responsable: string
+  destino: string
+  fechaSalida: string
+  fechaPrevista: string
+  fechaDevolucion: string | null
+  estadoDevolucion: EstadoArticulo | null
+  diasRetraso: number
+}
+
+// ---------------------------------------------------------------- Alertas (RF-30 a RF-32)
+export interface AlertaVencimiento {
+  articuloId: number
+  codigo: string
+  producto: string
+  lote: string | null
+  fechaVencimiento: string
+  diasRestantes: number
+  stockActual: number
+  unidadMedida: string
+}
+
+export interface Alertas {
+  stockMinimo: ArticuloResumen[]
+  vencimientos: AlertaVencimiento[]
+  herramientasSinDevolver: SalidaHerramienta[]
+  respaldo: { ultimo: string | null; diasDesdeUltimo: number | null; mensaje: string } | null
+  diasAnticipacion: number
+  total: number
+}
+
+export interface ResumenAlertas {
+  stockMinimo: number
+  vencimientos: number
+  herramientasSinDevolver: number
+  respaldo: number
+  total: number
+}
+
+// ---------------------------------------------------------------- Reportes (RF-33 a RF-35)
+export type TipoColumna = 'Texto' | 'Numero' | 'Fecha' | 'FechaHora'
+
+export interface TipoReporte {
+  clave: string
+  titulo: string
+  descripcion: string
+  requerimiento: string
+  filtros: string[]
+}
+
+export interface Reporte {
+  clave: string
+  titulo: string
+  descripcion: string
+  filtros: string[]
+  columnas: { titulo: string; tipo: TipoColumna }[]
+  filas: (string | number | null)[][]
+  generado: string
+  generadoPor: string
+}
+
+// ---------------------------------------------------------------- Respaldos (RF-38, RF-39)
+export interface RespaldoInfo {
+  id: number
+  archivo: string
+  fecha: string
+  tamanoBytes: number
+  descripcion: string | null
 }
 
 export const Permisos = {
@@ -132,7 +235,13 @@ export const Permisos = {
   ArticulosEditar: 'Articulos.Editar',
   MovimientosRegistrar: 'Movimientos.Registrar',
   MovimientosAjustar: 'Movimientos.Ajustar',
+  SolicitudesCrear: 'Solicitudes.Crear',
+  SolicitudesAprobar: 'Solicitudes.Aprobar',
+  HerramientasPrestar: 'Herramientas.Prestar',
+  AlertasVer: 'Alertas.Ver',
   CatalogosGestionar: 'Catalogos.Gestionar',
   UsuariosGestionar: 'Usuarios.Gestionar',
+  ReportesVer: 'Reportes.Ver',
   BitacoraVer: 'Bitacora.Ver',
+  RespaldosGestionar: 'Respaldos.Gestionar',
 } as const
