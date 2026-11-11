@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="../../tests/Muebleria.IntegrationTests/Muebleria.IntegrationTests.csproj" />
+  <Project Path="../../tests/Muebleria.UnitTests/Muebleria.UnitTests.csproj" />
+  <Project Path="Muebleria.Api/Muebleria.Api.csproj" />
+  <Project Path="Muebleria.Application/Muebleria.Application.csproj" />
+  <Project Path="Muebleria.Domain/Muebleria.Domain.csproj" />
+  <Project Path="Muebleria.Infrastructure/Muebleria.Infrastructure.csproj" />
+</Solution>

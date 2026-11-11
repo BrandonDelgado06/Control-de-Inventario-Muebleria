@@ -22,7 +22,7 @@ Este documento traduce el documento del proyecto (39 RF y 9 RNF) en decisiones d
 | Autenticación | Cookie de autenticación de ASP.NET Core (HttpOnly, SameSite=Strict, expiración deslizante de 30 min) | Cubre el cierre por inactividad de RF-01. Como la SPA se sirve desde el mismo origen, no hace falta JWT. |
 | Contraseñas | `PasswordHasher<T>` de ASP.NET Core (PBKDF2) | RNF-01. Sin instalar Identity completo. |
 | Autorización | Políticas por permiso (`[Authorize(Policy = "Articulos.Editar")]`) | RNF-02: se valida en el servidor, no solo se oculta el menú. |
-| Validación | FluentValidation (backend) + Zod (frontend) | RNF-03. |
+| Validación | DataAnnotations en los DTO (backend) y reglas de negocio en los servicios; el frontend muestra los mensajes que devuelve la API | RNF-03. Los mensajes de error están en español. |
 | Reportes | **QuestPDF** (PDF) y **ClosedXML** (Excel) | RF-35. Revisar la licencia de QuestPDF (gratuita para uso académico / empresas pequeñas). |
 | Frontend | **React 19 + TypeScript + Vite** | |
 | UI | Material UI (MUI) + MUI X DataGrid + MUI X Charts | Tablas con filtros y gráficos del panel (RF-37) sin depender de internet. |
@@ -134,20 +134,30 @@ Cada carpeta de `features/` (frontend) y de `Features/` (backend) contiene todo 
 
 ## 5. Modelo de datos
 
-El diagrama ER del documento ([entidad-relacion.png](diagramas/entidad-relacion.png)) es la base. Al compararlo con los RF, faltan campos y tablas que conviene añadir **antes** de la primera migración:
+Las 9 tablas del documento ([entidad-relacion.png](diagramas/entidad-relacion.png) y diccionario de datos) se crean **tal como están escritas**:
 
-### Cambios a tablas existentes
+- Mismos nombres de tabla y de columna (`ARTICULO`, `id_articulo`, `stock_actual`, `contrasena`…) y en el mismo orden.
+- Mismos tipos: `INT`, `VARCHAR(n)`, `DECIMAL(10,2)`, `DATE`, `DATETIME` y `BIT`.
+- Las mismas llaves primarias, foráneas y únicas (PK, FK, UK).
+- Los mismos valores por defecto: `stock_actual = 0`, `stock_minimo = 0`, `estado = 'Buena'`, `estado = 'Pendiente'` y `fecha_hora = GETDATE()`.
+- Las mismas reglas: existencia no negativa y cantidades mayores que cero.
+- Los valores de texto también son los del documento: `Nueva`, `Buena`, `Desgastada`, `Dañada`, `De baja`; `Entrada`, `Salida`, `Ajuste`, `Baja`, `Merma`; `Pendiente`, `Aprobada`, `Rechazada`, `Entregada`.
 
-| Tabla | Cambio | Motivo |
+`USUARIO.contrasena` guarda el hash PBKDF2, nunca la contraseña en texto (RNF-01).
+
+### Columnas agregadas al final de las tablas del documento
+
+Solo donde un requerimiento lo exige. Van después de las columnas del diccionario, así que no cambian su orden:
+
+| Tabla | Columnas agregadas | Requerimiento |
 |---|---|---|
-| USUARIO | `contrasena` → `contrasena_hash NVARCHAR(256)` | RNF-01: se guarda el hash, nunca la contraseña. |
-| CATEGORIA, UBICACION | + `activo BIT` | RF-05: desactivar. |
-| CATEGORIA | + `tipo_inventario` (Herramienta, Acabado, MateriaPrima, Instalacion) | Separa los módulos 5 a 8 sin crear tablas distintas. |
-| ARTICULO | + `activo BIT`, `foto_ruta NVARCHAR(260)`, `presentacion NVARCHAR(20)`, `version ROWVERSION` | RF-08, RF-09, RF-12 y control de concurrencia. |
-| MOVIMIENTO | + `stock_anterior`, `stock_nuevo`, `id_referencia` (solicitud o conteo de origen) | RF-21 (valor anterior y nuevo), RF-25 y RF-29 (trazabilidad). |
-| SOLICITUD | + `motivo`, `motivo_rechazo`, `fecha_entrega` | RF-23, RF-24 y RF-25. |
-| SALIDA_HERRAMIENTA | + `cantidad DECIMAL(10,2)` | Permite que salgan varias unidades del mismo artículo. |
-| BITACORA | + `entidad`, `id_entidad`, `detalle NVARCHAR(MAX)` (JSON antes/después) | RF-04: rastrear qué cambió. |
+| CATEGORIA | `tipo_inventario VARCHAR(20)` | Separar los módulos 5 a 8 (herramientas, acabados, materia prima, instalación) |
+| UBICACION | `activo BIT` | RF-05: desactivar ubicaciones |
+| ARTICULO | `presentacion VARCHAR(20)`, `foto_ruta VARCHAR(260)`, `activo BIT`, `version ROWVERSION` | RF-12 (litro o galón), RF-08 (fotografía), RF-09 (desactivar), RNF-06 (dos usuarios no pueden descontar a la vez) |
+| MOVIMIENTO | `stock_anterior`, `stock_nuevo DECIMAL(10,2)` | RF-21: valor anterior y valor nuevo del ajuste |
+| SOLICITUD | `motivo`, `motivo_rechazo VARCHAR(150)`, `fecha_entrega DATETIME` | RF-23, RF-24 y RF-25 |
+
+ROL, USUARIO, SALIDA_HERRAMIENTA y BITACORA quedan exactamente como en el documento.
 
 ### Tablas nuevas
 

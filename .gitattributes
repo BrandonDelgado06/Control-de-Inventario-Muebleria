@@ -6,3 +6,4 @@
 *.jpg   binary
 *.docx  binary
 *.bak   binary
+*.cmd   text eol=crlf

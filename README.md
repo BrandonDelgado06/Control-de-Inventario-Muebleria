@@ -18,6 +18,14 @@ Proyecto final de **ISB-32 Programación Avanzada**, Universidad Internacional S
 - [Guía de trabajo en GitHub](CONTRIBUTING.md): ramas, commits, PR y configuración del repositorio.
 - Diagramas: [casos de uso](docs/diagramas/casos-de-uso.png) · [entidad-relación](docs/diagramas/entidad-relacion.png)
 
+## Probar el sistema
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\iniciar.ps1
+```
+
+Abre dos ventanas, **Inventario - API** e **Inventario - Web**, y luego el navegador en http://localhost:5173. Para detener el sistema, cierra esas dos ventanas. Los usuarios de prueba son `admin`, `encargado` y `trabajador`; sus contraseñas están en `src/backend/Muebleria.Api/appsettings.Development.json`, en la sección `Seed`.
+
 ## Requisitos
 
 | Herramienta | Versión |
@@ -61,3 +69,18 @@ La cadena de conexión local se guarda con *user secrets*, nunca en el repositor
 ```powershell
 dotnet user-secrets set "ConnectionStrings:Inventario" "Server=.;Database=MuebleriaInventario;Trusted_Connection=True;TrustServerCertificate=True" --project src\backend\Muebleria.Api
 ```
+
+## Qué pasa al arrancar la API en desarrollo
+
+- Aplica las migraciones pendientes y crea la base `MuebleriaInventario` si no existe.
+- Crea los roles, los permisos, la configuración y el usuario `admin`.
+- Con `Seed:DatosEjemplo = true` (solo en `appsettings.Development.json`) agrega los usuarios de prueba `encargado` y `trabajador`, 4 ubicaciones, 7 categorías con campos personalizados y 14 artículos del taller.
+- Las contraseñas de prueba están en `src/backend/Muebleria.Api/appsettings.Development.json`, sección `Seed`. En producción no se crean datos de ejemplo y la contraseña del administrador se define en `appsettings.Production.json` del servidor.
+
+Para empezar desde cero, borra la base de datos y vuelve a arrancar la API:
+
+```powershell
+sqlcmd -S . -E -C -Q "DROP DATABASE MuebleriaInventario"
+```
+
+Documentación de la API (solo en desarrollo): http://localhost:5000/scalar

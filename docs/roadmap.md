@@ -6,6 +6,34 @@ El plan se divide en sprints de una semana. Cada sprint termina con un merge de 
 
 Prioridad: los RF de prioridad **Alta** van primero. Si el tiempo no alcanza, se recortan primero los de prioridad **Baja** (RF-06, RF-36 y RF-37).
 
+## Entregas al profesor
+
+Antes de la entrega final hay dos avances. Los sprints se acomodan a ellos:
+
+| Entrega | Fecha | Qué se presenta | Estado |
+|---|---|---|---|
+| **Avance 1** | por confirmar | Código funcional parcial: base de datos completa y los módulos de seguridad, catálogo y movimientos funcionando de punta a punta | Listo para revisar (rama `chore/sprint0-proyectos`) |
+| **Avance 2** | por confirmar | Pruebas: unitarias, de integración y plan de pruebas manuales con evidencias, más los módulos del sprint 3 | Pendiente |
+| **Entrega final** | 4 dic | Sistema completo, reportes, respaldos, documento final | Pendiente |
+
+### Contenido del avance 1
+
+**Base de datos (completa):** las 19 tablas del modelo ([propuesta-tecnica.md §5](propuesta-tecnica.md#5-modelo-de-datos)) con los nombres del diccionario de datos (`ARTICULO`, `id_articulo`, `stock_actual`…), llaves foráneas sin borrado en cascada, restricciones `CHECK` (existencia ≥ 0, cantidades > 0), `rowversion` en `ARTICULO`, índices únicos y la columna calculada `diferencia` del conteo físico. Se crea con la migración `Inicial` y se llena con datos de ejemplo del taller.
+
+**Módulos funcionando (API + pantallas):**
+
+| Módulo | RF | Qué se puede mostrar |
+|---|---|---|
+| Usuarios y accesos | RF-01, RF-02, RNF-01, RNF-02 | Login, cierre por inactividad (30 min), usuarios y roles; un trabajador recibe 403 si llama a un endpoint de administrador |
+| Bitácora | RF-03, RF-04 | Cada creación, edición y movimiento queda registrado solo; consulta con filtros |
+| Ubicaciones | RF-05, RF-06 | Crear, editar, desactivar (no deja si tiene artículos) y ver qué hay en cada una |
+| Catálogo | RF-07, RF-08, RF-09 | Categorías con campos personalizados (grano, espesor, especie), artículos con otros nombres (alias) y búsqueda por ellos |
+| Inventario por tipo | RF-10, RF-12, RF-14, RF-15 (parcial) | Filtro por tipo; acabados exigen lote y vencimiento |
+| Movimientos | RF-19, RF-20, RF-21, RF-22, RNF-06 | Entradas, salidas (no permite stock negativo), ajustes solo del administrador e historial |
+| Panel | RF-36 (inicial) | Totales, artículos bajo el mínimo y últimos movimientos |
+
+**Queda para después:** fotografía del artículo (la columna ya existe), RF-11 en pantalla (el historial de estado ya se guarda), herramientas de instalación (RF-16 a 18), solicitudes, bajas y mermas, inventario físico, alertas, reportes y respaldos.
+
 ## Resumen
 
 | Sprint | Fechas | Objetivo | Versión |
@@ -23,11 +51,11 @@ Prioridad: los RF de prioridad **Alta** van primero. Si el tiempo no alcanza, se
 - [x] Instalar el SDK de .NET 10 y Node.js LTS (hecho el 4 nov). Se usa SQL Server 2022 en desarrollo.
 - [ ] Decidir antes del Sprint 4 si el taller usa SQL Server 2025 o se actualiza el documento a 2022.
 - [ ] Crear el repositorio con esta estructura, configurar la protección de ramas y crear las etiquetas y los milestones ([CONTRIBUTING.md](../CONTRIBUTING.md)).
-- [ ] Ejecutar `scripts/crear-proyectos.ps1`: solución .NET de 4 capas, 2 proyectos de pruebas y el proyecto Vite.
-- [ ] `AppDbContext` con **todas** las entidades del modelo ([propuesta-tecnica.md §5](propuesta-tecnica.md#5-modelo-de-datos)) y la migración `Inicial`.
-- [ ] Datos semilla: 3 roles, permisos y el usuario administrador inicial.
-- [ ] Middleware de errores, OpenAPI y CORS solo para desarrollo.
-- [ ] Layout del frontend: menú lateral por módulo, ruteo y tema de MUI.
+- [x] Ejecutar `scripts/crear-proyectos.ps1`: solución .NET de 4 capas, 2 proyectos de pruebas y el proyecto Vite.
+- [x] `AppDbContext` con **todas** las entidades del modelo ([propuesta-tecnica.md §5](propuesta-tecnica.md#5-modelo-de-datos)) y la migración `Inicial`.
+- [x] Datos semilla: 3 roles, permisos y el usuario administrador inicial.
+- [x] Middleware de errores y OpenAPI (Scalar en `/scalar`). No hace falta CORS: Vite redirige `/api` a la API.
+- [x] Layout del frontend: menú lateral por módulo, ruteo y tema de MUI.
 - [ ] El CI compila y prueba el backend y el frontend en cada PR.
 
 **Listo cuando:** `dotnet run` y `npm run dev` levantan, y la migración crea la BD vacía con los datos semilla.
