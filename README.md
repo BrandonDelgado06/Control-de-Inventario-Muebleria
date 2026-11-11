@@ -8,7 +8,7 @@ Proyecto final de **ISB-32 Programación Avanzada**, Universidad Internacional S
 |---|---|
 | Backend | ASP.NET Core 10 (C# 14) + EF Core |
 | Frontend | React 19 + TypeScript + Vite + MUI |
-| Base de datos | SQL Server 2022 en desarrollo (2025 para la entrega) |
+| Base de datos | SQL Server 2022 (Developer en desarrollo, Express en el taller) |
 | Entrega | 4 de diciembre de 2026 |
 
 ## Documentación
@@ -32,7 +32,7 @@ Abre dos ventanas, **Inventario - API** e **Inventario - Web**, y luego el naveg
 |---|---|
 | SDK de .NET | 10.0.100 o superior (fijado en `global.json`) |
 | Node.js | 22 LTS o superior |
-| SQL Server | 2022 o 2025, Developer o Express. Los ejemplos usan la instancia por defecto (`.`); con Express usar `.\SQLEXPRESS` |
+| SQL Server | 2022, Developer o Express. Los ejemplos usan la instancia por defecto (`.`); con Express usar `.\SQLEXPRESS` |
 | Visual Studio Code | Con las extensiones de `.vscode/extensions.json` |
 
 ## Primeros pasos
