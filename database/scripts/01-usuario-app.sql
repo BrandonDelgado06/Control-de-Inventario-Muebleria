@@ -1,6 +1,6 @@
 /*
   Crea la base de datos y el usuario de la aplicación con permisos mínimos.
-  Ejecutar UNA vez como administrador de SQL Server (sqlcmd -S .\SQLEXPRESS -E -i 01-usuario-app.sql).
+  Ejecutar UNA vez como administrador de SQL Server (sqlcmd -S . -E -C -i 01-usuario-app.sql).
   Cambiar la contraseña antes de ejecutarlo y guardarla solo en appsettings.Production.json del servidor.
 */
 IF DB_ID(N'MuebleriaInventario') IS NULL

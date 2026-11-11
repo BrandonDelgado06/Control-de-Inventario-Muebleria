@@ -18,7 +18,7 @@ Este documento traduce el documento del proyecto (39 RF y 9 RNF) en decisiones d
 |---|---|---|
 | Backend | **ASP.NET Core 10 (C# 14)**, Web API con controladores | .NET 10 es LTS. |
 | Acceso a datos | **Entity Framework Core 10** + `Microsoft.EntityFrameworkCore.SqlServer` | Las consultas parametrizadas son automáticas (RNF-03). Migraciones = fuente de verdad del esquema. |
-| Base de datos | **SQL Server 2025** (Express o Developer) local | |
+| Base de datos | **SQL Server 2022** Developer en desarrollo; 2025 en el equipo del taller | Todo lo que usa el proyecto (EF Core 10, BACKUP/RESTORE, CHECK, rowversion) funciona igual en ambas versiones. |
 | Autenticación | Cookie de autenticación de ASP.NET Core (HttpOnly, SameSite=Strict, expiración deslizante de 30 min) | Cubre el cierre por inactividad de RF-01. Como la SPA se sirve desde el mismo origen, no hace falta JWT. |
 | Contraseñas | `PasswordHasher<T>` de ASP.NET Core (PBKDF2) | RNF-01. Sin instalar Identity completo. |
 | Autorización | Políticas por permiso (`[Authorize(Policy = "Articulos.Editar")]`) | RNF-02: se valida en el servidor, no solo se oculta el menú. |
@@ -32,7 +32,7 @@ Este documento traduce el documento del proyecto (39 RF y 9 RNF) en decisiones d
 | Pruebas | xUnit + FluentAssertions + Testcontainers o LocalDB (backend), Vitest + Testing Library (frontend) | |
 | Control de versiones | Git + GitHub (ver [CONTRIBUTING.md](../CONTRIBUTING.md)) | |
 
-> **Nota de versiones:** el equipo de desarrollo actualmente tiene el SDK de .NET **9** y no tiene Node.js. Hay que instalar el **SDK de .NET 10** y **Node.js 22 LTS** o superior antes del Sprint 0 (ver [README](../README.md#requisitos)).
+> **Nota de versiones (4 nov 2026):** el equipo de desarrollo ya tiene el SDK de .NET 10.0.403, Node.js 26 LTS y SQL Server 2022 Developer. Se decidió desarrollar con SQL Server 2022 porque la instancia tiene bases de datos de otras materias y actualizarla es riesgoso. El documento del proyecto indica 2025: hay que instalar 2025 en el equipo del taller o actualizar el documento a 2022.
 
 ## 3. Arquitectura
 
@@ -47,7 +47,7 @@ Este documento traduce el documento del proyecto (39 RF y 9 RNF) en decisiones d
  └───────────────┬──────────────────────────┘
                  │ EF Core
                  ▼
-        SQL Server 2025 (local)  ──►  database/backups  ──►  USB / disco externo
+        SQL Server 2022/2025 (local) ─►  database/backups  ──►  USB / disco externo
 ```
 
 Un **solo proceso** sirve la API y el frontend compilado. En producción se instala como **servicio de Windows** para que arranque con el equipo.
@@ -190,7 +190,7 @@ El diagrama ER del documento ([entidad-relacion.png](diagramas/entidad-relacion.
 
 ## 8. Despliegue en el taller
 
-1. Instalar SQL Server 2025 Express y crear el usuario de la app (`database/scripts/01-usuario-app.sql`).
+1. Instalar SQL Server 2025 Express (o 2022) y crear el usuario de la app (`database/scripts/01-usuario-app.sql`).
 2. `dotnet publish -c Release` (antes, el build de React se copia a `wwwroot`).
 3. Registrar el servicio: `sc.exe create MuebleriaInventario binPath= "...\Muebleria.Api.exe"`.
 4. Abrir el puerto en el firewall de Windows para la red local.

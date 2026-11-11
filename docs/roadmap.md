@@ -20,7 +20,8 @@ Prioridad: los RF de prioridad **Alta** van primero. Si el tiempo no alcanza, se
 
 ## Sprint 0 · Base del proyecto (4–8 nov)
 
-- [ ] Instalar el SDK de .NET 10, Node.js 22 LTS y SQL Server 2025 en los equipos del equipo.
+- [x] Instalar el SDK de .NET 10 y Node.js LTS (hecho el 4 nov). Se usa SQL Server 2022 en desarrollo.
+- [ ] Decidir antes del Sprint 4 si el taller usa SQL Server 2025 o se actualiza el documento a 2022.
 - [ ] Crear el repositorio con esta estructura, configurar la protección de ramas y crear las etiquetas y los milestones ([CONTRIBUTING.md](../CONTRIBUTING.md)).
 - [ ] Ejecutar `scripts/crear-proyectos.ps1`: solución .NET de 4 capas, 2 proyectos de pruebas y el proyecto Vite.
 - [ ] `AppDbContext` con **todas** las entidades del modelo ([propuesta-tecnica.md §5](propuesta-tecnica.md#5-modelo-de-datos)) y la migración `Inicial`.

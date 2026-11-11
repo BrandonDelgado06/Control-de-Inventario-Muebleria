@@ -1,6 +1,6 @@
 /*
   Respaldo manual de emergencia (equivale a RF-38 si la aplicación no está disponible).
-  sqlcmd -S .\SQLEXPRESS -E -i respaldo-manual.sql -v CARPETA="C:\Respaldos\Muebleria"
+  sqlcmd -S . -E -C -i respaldo-manual.sql -v CARPETA="C:\Respaldos\Muebleria"
   Después, copiar el .bak a una USB o disco externo (RNF-07).
 */
 DECLARE @archivo NVARCHAR(400) =
