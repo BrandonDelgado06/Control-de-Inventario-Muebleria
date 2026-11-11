@@ -28,6 +28,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddSeguridad(builder.Configuration, builder.Environment.ContentRootPath);
+builder.Services.AddSingleton<Muebleria.Application.Common.Interfaces.IAlmacenFotos, Muebleria.Api.Servicios.AlmacenFotosDisco>();
 
 var app = builder.Build();
 

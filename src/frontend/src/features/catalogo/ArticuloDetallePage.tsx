@@ -1,15 +1,20 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link as RouterLink, useParams } from 'react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Box, Breadcrumbs, Button, Chip, Link, Paper, Stack, Typography } from '@mui/material'
+import {
+  Box, Breadcrumbs, Button, Chip, IconButton, Link, Paper, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography,
+} from '@mui/material'
 import EditOutlined from '@mui/icons-material/EditOutlined'
+import AddAPhotoOutlined from '@mui/icons-material/AddAPhotoOutlined'
+import DeleteOutlined from '@mui/icons-material/DeleteOutlined'
+import ImageOutlined from '@mui/icons-material/ImageOutlined'
 import SwapVertOutlined from '@mui/icons-material/SwapVertOutlined'
 import { api, mensajeError } from '../../api/cliente'
-import { Permisos, type ArticuloDetalle } from '../../api/tipos'
+import { Permisos, type ArticuloDetalle, type HistorialEstado } from '../../api/tipos'
 import { useAuth } from '../../app/AuthContext'
 import { useNotificar } from '../../components/Notificaciones'
 import { Cargando, ChipEstado, ChipStock, Pagina } from '../../components/Pagina'
-import { fmtFecha, fmtNumero, nombreTipoInventario } from '../../lib/formato'
+import { fmtFecha, fmtFechaHora, fmtNumero, nombreTipoInventario } from '../../lib/formato'
 import { HistorialMovimientos } from '../movimientos/MovimientosPage'
 import { RegistrarMovimientoDialog } from '../movimientos/RegistrarMovimientoDialog'
 import { ArticuloFormDialog } from './ArticuloFormDialog'
@@ -20,6 +25,104 @@ function Dato({ etiqueta, children }: { etiqueta: string; children: React.ReactN
       <Typography variant="caption" color="text.secondary">{etiqueta}</Typography>
       <Typography component="div">{children}</Typography>
     </Box>
+  )
+}
+
+const TIPOS_FOTO = 'image/jpeg,image/png,image/webp'
+const MAX_FOTO = 3 * 1024 * 1024
+
+/** RF-08: fotografía del artículo. Se guarda en el servidor; aquí se ve, se cambia o se quita. */
+function FotoArticulo({ id, nombre, tieneFoto, editable }: { id: number; nombre: string; tieneFoto: boolean; editable: boolean }) {
+  const qc = useQueryClient()
+  const notificar = useNotificar()
+  const entrada = useRef<HTMLInputElement>(null)
+  const [version, setVersion] = useState(0)   // obliga al navegador a pedir la foto nueva
+
+  const listo = (texto: string) => {
+    setVersion((v) => v + 1)
+    qc.invalidateQueries({ queryKey: ['articulo', id] })
+    notificar(texto)
+  }
+  const subir = useMutation({
+    mutationFn: async (archivo: File) => {
+      const datos = new FormData()
+      datos.append('archivo', archivo)
+      await api.post(`/articulos/${id}/foto`, datos)
+    },
+    onSuccess: () => listo('Foto guardada.'),
+    onError: (e) => notificar(mensajeError(e), 'error'),
+  })
+  const quitar = useMutation({
+    mutationFn: () => api.delete(`/articulos/${id}/foto`),
+    onSuccess: () => listo('Foto eliminada.'),
+    onError: (e) => notificar(mensajeError(e), 'error'),
+  })
+
+  function elegir(e: React.ChangeEvent<HTMLInputElement>) {
+    const archivo = e.target.files?.[0]
+    e.target.value = ''
+    if (!archivo) return
+    if (archivo.size > MAX_FOTO) { notificar('La foto pesa más de 3 MB.', 'error'); return }
+    subir.mutate(archivo)
+  }
+
+  return (
+    <Paper sx={{ position: 'relative', overflow: 'hidden', aspectRatio: '4 / 3', display: 'grid', placeItems: 'center', bgcolor: 'action.hover' }}>
+      {tieneFoto ? (
+        <Box component="img" src={`/api/articulos/${id}/foto?v=${version}`} alt={`Foto de ${nombre}`}
+          sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      ) : (
+        <Stack sx={{ alignItems: 'center', color: 'text.secondary', p: 2, textAlign: 'center' }} spacing={0.5}>
+          <ImageOutlined sx={{ fontSize: 40 }} />
+          <Typography variant="body2">Sin fotografía</Typography>
+        </Stack>
+      )}
+      {editable && (
+        <Stack direction="row" spacing={0.5} sx={{ position: 'absolute', right: 8, bottom: 8 }}>
+          <input ref={entrada} type="file" accept={TIPOS_FOTO} hidden onChange={elegir} />
+          <Tooltip title={tieneFoto ? 'Cambiar foto' : 'Subir foto (JPG, PNG o WEBP, hasta 3 MB)'}>
+            <IconButton aria-label={tieneFoto ? 'Cambiar foto' : 'Subir foto'} onClick={() => entrada.current?.click()} disabled={subir.isPending}
+              sx={{ bgcolor: 'background.paper', boxShadow: 1, '&:hover': { bgcolor: 'background.paper' } }}>
+              <AddAPhotoOutlined fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          {tieneFoto && (
+            <Tooltip title="Quitar foto">
+              <IconButton aria-label="Quitar foto" onClick={() => quitar.mutate()} disabled={quitar.isPending}
+                sx={{ bgcolor: 'background.paper', boxShadow: 1, '&:hover': { bgcolor: 'background.paper' } }}>
+                <DeleteOutlined fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Stack>
+      )}
+    </Paper>
+  )
+}
+
+/** RF-11: cada cambio de estado (por edición, devolución de instalación o baja) con quién lo hizo. */
+function HistorialEstados({ id }: { id: number }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['articulo', id, 'estados'],
+    queryFn: async () => (await api.get<HistorialEstado[]>(`/articulos/${id}/estados`)).data,
+  })
+  if (isLoading) return <Cargando />
+  if (!data?.length) return <Paper><Typography color="text.secondary" sx={{ p: 2 }}>El estado no ha cambiado desde que se registró.</Typography></Paper>
+  return (
+    <Paper sx={{ minWidth: 0, overflowX: 'auto' }}>
+      <Table size="small">
+        <TableHead><TableRow><TableCell>Fecha</TableCell><TableCell>Cambio</TableCell><TableCell>Responsable</TableCell></TableRow></TableHead>
+        <TableBody>
+          {data.map((h) => (
+            <TableRow key={h.id}>
+              <TableCell sx={{ whiteSpace: 'nowrap' }}>{fmtFechaHora(h.fechaHora)}</TableCell>
+              <TableCell sx={{ whiteSpace: 'nowrap' }}><ChipEstado estado={h.estadoAnterior} /> → <ChipEstado estado={h.estadoNuevo} /></TableCell>
+              <TableCell>{h.usuario}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Paper>
   )
 }
 
@@ -69,7 +172,9 @@ export function ArticuloDetallePage() {
         </>}
       </>}
     >
-      <Paper sx={{ p: 2.5 }}>
+      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: '260px 1fr' }, alignItems: 'start' }}>
+      <FotoArticulo id={id} nombre={a.nombre} tieneFoto={data.tieneFoto} editable={tiene(Permisos.ArticulosEditar)} />
+      <Paper sx={{ p: 2.5, minWidth: 0 }}>
         <Box sx={{ display: 'grid', gap: 2.5, gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' } }}>
           <Dato etiqueta="Existencia"><ChipStock actual={a.stockActual} minimo={a.stockMinimo} unidad={a.unidadMedida} /></Dato>
           <Dato etiqueta="Stock mínimo">{fmtNumero(a.stockMinimo)} {a.unidadMedida}</Dato>
@@ -90,6 +195,10 @@ export function ArticuloDetallePage() {
           </Stack>
         )}
       </Paper>
+      </Box>
+
+      <Typography variant="h2">Historial de estados</Typography>
+      <HistorialEstados id={id} />
 
       <Typography variant="h2">Historial de movimientos</Typography>
       <HistorialMovimientos articuloId={id} />

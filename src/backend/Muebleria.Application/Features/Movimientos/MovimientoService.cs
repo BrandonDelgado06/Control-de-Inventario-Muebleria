@@ -36,6 +36,18 @@ public class MovimientoService(IAppDbContext db, IUsuarioActual actual)
         if (!TiposAvance1.Contains(req.Tipo))
             throw new DomainException($"Los movimientos de tipo {req.Tipo} se registran desde su propio módulo.");
 
+        return await AplicarAsync(req.ArticuloId, req.Tipo, req.Cantidad, req.Motivo, null, ct);
+    }
+
+    /// <summary>
+    /// Registra un movimiento con reintento por concurrencia. <paramref name="validar"/> corre antes de
+    /// aplicar (para reglas propias de cada módulo) y <paramref name="despues"/> después de aplicar,
+    /// dentro del mismo guardado (por ejemplo, para cambiar el estado del artículo).
+    /// </summary>
+    public async Task<MovimientoDto> AplicarAsync(
+        int articuloId, TipoMovimiento tipo, decimal cantidad, string motivo,
+        Action<Articulo, Movimiento>? despues, CancellationToken ct, Action<Articulo>? validar = null)
+    {
         var usuario = actual.Id ?? throw new DomainException("No hay un usuario en sesión.");
 
         // Si otra persona movió el mismo artículo al mismo tiempo (rowversion), se vuelve a leer la
@@ -43,10 +55,12 @@ public class MovimientoService(IAppDbContext db, IUsuarioActual actual)
         // salida que ya no alcanza se rechaza con el mensaje de existencia insuficiente.
         for (var intento = 1; ; intento++)
         {
-            var articulo = await db.Articulos.FindAsync([req.ArticuloId], ct)
-                ?? throw new NoEncontradoException("Artículo", req.ArticuloId);
-            var movimiento = Crear(articulo, req.Tipo, req.Cantidad, req.Motivo, usuario);
+            var articulo = await db.Articulos.Include(a => a.Categoria).FirstOrDefaultAsync(a => a.Id == articuloId, ct)
+                ?? throw new NoEncontradoException("Artículo", articuloId);
+            validar?.Invoke(articulo);
+            var movimiento = Crear(articulo, tipo, cantidad, motivo, usuario);
             db.Movimientos.Add(movimiento);
+            despues?.Invoke(articulo, movimiento);
             try
             {
                 await db.SaveChangesAsync(ct);

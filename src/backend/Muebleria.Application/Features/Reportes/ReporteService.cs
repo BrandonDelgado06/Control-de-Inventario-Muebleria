@@ -28,10 +28,14 @@ public class ReporteService(IAppDbContext db, IUsuarioActual actual, IExportador
     public static readonly IReadOnlyList<TipoReporteDto> Tipos =
     [
         new("existencias", "Existencias actuales", "Lo que hay de cada artículo, con su mínimo y su estado.", "RF-33", ["categoria", "ubicacion"]),
-        new("movimientos", "Movimientos por período", "Entradas, salidas y ajustes en un rango de fechas.", "RF-33", ["periodo", "categoria", "articulo", "usuario", "tipo"]),
+        new("movimientos", "Movimientos por período", "Entradas, salidas, ajustes, bajas y mermas en un rango de fechas.", "RF-33", ["periodo", "categoria", "articulo", "usuario", "tipo"]),
         new("consumo", "Consumo por categoría", "Material que salió del inventario en el período, agrupado por categoría.", "RF-34", ["periodo", "categoria"]),
         new("herramientas-fuera", "Herramientas fuera del taller", "Herramientas de instalación que no han regresado.", "RF-34", []),
     ];
+
+    /// <summary>Para el filtro "usuario": todos, también los desactivados (sus movimientos siguen en el historial).</summary>
+    public Task<List<Instalacion.PersonaDto>> ResponsablesAsync(CancellationToken ct) =>
+        db.Usuarios.OrderBy(u => u.Nombre).Select(u => new Instalacion.PersonaDto(u.Id, u.Nombre)).ToListAsync(ct);
 
     public async Task<ReporteDto> GenerarAsync(string clave, ReporteFiltro f, CancellationToken ct)
     {

@@ -93,6 +93,73 @@ export interface ArticuloDetalle {
   presentacion: string | null
   alias: string[]
   campos: ValorCampo[]
+  tieneFoto: boolean
+}
+
+/** RF-11 */
+export interface HistorialEstado {
+  id: number
+  fechaHora: string
+  estadoAnterior: EstadoArticulo
+  estadoNuevo: EstadoArticulo
+  usuario: string
+}
+
+// ---------------------------------------------------------------- Acabados por lote (RF-13)
+export interface LoteAcabado {
+  articuloId: number
+  codigo: string
+  lote: string | null
+  presentacion: string | null
+  ubicacion: string
+  existencia: number
+  stockMinimo: number
+  fechaVencimiento: string | null
+  diasParaVencer: number | null
+}
+
+export interface AcabadoAgrupado {
+  producto: string
+  unidadMedida: string
+  existenciaTotal: number
+  lotesVencidos: number
+  lotesPorVencer: number
+  lotes: LoteAcabado[]
+}
+
+// ---------------------------------------------------------------- Bajas y mermas (RF-26, RF-27)
+export type CausaMerma = 'Desperdicio' | 'Danio' | 'Vencimiento'
+
+// ---------------------------------------------------------------- Inventario físico (RF-28, RF-29)
+export type EstadoConteo = 'Abierto' | 'Aplicado'
+
+export interface ConteoResumen {
+  id: number
+  fecha: string
+  ubicacion: string | null
+  categoria: string | null
+  responsable: string
+  estado: EstadoConteo
+  totalArticulos: number
+  contados: number
+  conDiferencia: number
+}
+
+export interface ConteoDetalle {
+  id: number
+  articuloId: number
+  codigo: string
+  articulo: string
+  unidadMedida: string
+  ubicacion: string
+  stockSistema: number
+  cantidadContada: number | null
+  diferencia: number | null
+}
+
+export interface Conteo {
+  conteo: ConteoResumen
+  detalles: ConteoDetalle[]
 }
 
 export interface Movimiento {
@@ -238,6 +305,7 @@ export const Permisos = {
   SolicitudesCrear: 'Solicitudes.Crear',
   SolicitudesAprobar: 'Solicitudes.Aprobar',
   HerramientasPrestar: 'Herramientas.Prestar',
+  InventarioContar: 'Inventario.Contar',
   AlertasVer: 'Alertas.Ver',
   CatalogosGestionar: 'Catalogos.Gestionar',
   UsuariosGestionar: 'Usuarios.Gestionar',

@@ -137,3 +137,18 @@ Un mismo `ReporteDto` (columnas con su tipo y filas) sirve para mostrar en panta
 | Configurar anticipación de vencimiento | | | ✓ |
 | Reportes y exportación | | | ✓ |
 | Respaldo y restauración | | | ✓ |
+
+## Bajas y mermas (RF-26, RF-27)
+
+- **Merma:** material que se pierde por desperdicio, daño o vencimiento. Resta existencia con un movimiento de tipo `Merma` y el motivo "Merma por …". Una merma por vencimiento solo se acepta si el producto ya venció. Vale para cualquier material, también consumibles como lijas.
+- **Baja de herramienta:** solo para herramientas (manuales o de instalación), con motivo obligatorio y por unidades completas. Si ya no queda ninguna unidad, la herramienta pasa a estado "De baja", se desactiva y el cambio queda en el historial de estados (RF-11).
+- Permiso: `Movimientos.Registrar` (encargado y administrador). En la bitácora aparecen en el módulo "Bajas y mermas".
+
+## Inventario físico (RF-28, RF-29)
+
+1. El encargado abre un conteo por ubicación, por categoría o de todo. Se guarda la existencia del sistema de cada artículo activo en ese momento (`CONTEO_DETALLE.stock_sistema`). No se permiten dos conteos abiertos que incluyan los mismos artículos.
+2. Anota lo que encontró (`cantidad_contada`, nula mientras no se cuente) y puede guardar a medias. SQL Server calcula `diferencia = cantidad_contada − stock_sistema`.
+3. El administrador aplica el conteo cuando todo está contado. Cada diferencia se registra como un ajuste con el motivo "Conteo físico #n: diferencia ±x". Se **suma la diferencia** a la existencia actual en lugar de copiar lo contado, para no borrar las entradas o salidas hechas mientras se contaba.
+4. Un conteo aplicado ya no se modifica; uno abierto se puede eliminar sin afectar existencias.
+
+La migración `ConteoPendiente` hace nula la columna `cantidad_contada` (y vuelve a crear la columna calculada `diferencia`, porque SQL Server no permite cambiar una columna que otra calculada usa).

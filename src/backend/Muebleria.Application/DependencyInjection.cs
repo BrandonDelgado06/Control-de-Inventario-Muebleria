@@ -3,9 +3,11 @@ using Muebleria.Application.Features.Alertas;
 using Muebleria.Application.Features.Articulos;
 using Muebleria.Application.Features.Auth;
 using Muebleria.Application.Features.Auditoria;
+using Muebleria.Application.Features.Bajas;
 using Muebleria.Application.Features.Categorias;
 using Muebleria.Application.Features.Dashboard;
 using Muebleria.Application.Features.Instalacion;
+using Muebleria.Application.Features.InventarioFisico;
 using Muebleria.Application.Features.Movimientos;
 using Muebleria.Application.Features.Reportes;
 using Muebleria.Application.Features.Respaldos;
@@ -32,6 +34,9 @@ public static class DependencyInjection
         services.AddScoped<AlertaService>();
         services.AddScoped<ReporteService>();
         services.AddScoped<RespaldoService>();
+        services.AddScoped<FotoService>();
+        services.AddScoped<BajaService>();
+        services.AddScoped<ConteoService>();
         return services;
     }
 }

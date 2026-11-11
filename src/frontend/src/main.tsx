@@ -25,6 +25,9 @@ import { InstalacionPage } from './features/instalacion/InstalacionPage'
 import { AlertasPage } from './features/alertas/AlertasPage'
 import { ReportesPage } from './features/reportes/ReportesPage'
 import { RespaldosPage } from './features/respaldos/RespaldosPage'
+import { BajasPage } from './features/bajas/BajasPage'
+import { ConteoPage, InventarioFisicoPage } from './features/inventario-fisico/InventarioFisicoPage'
+import { AcabadosPage } from './features/acabados/AcabadosPage'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false, staleTime: 15_000 } },
@@ -59,6 +62,10 @@ function App() {
         <Route path="alertas" element={<Protegida permiso={Permisos.AlertasVer}><AlertasPage /></Protegida>} />
         <Route path="reportes" element={<Protegida permiso={Permisos.ReportesVer}><ReportesPage /></Protegida>} />
         <Route path="respaldos" element={<Protegida permiso={Permisos.RespaldosGestionar}><RespaldosPage /></Protegida>} />
+        <Route path="acabados" element={<Protegida permiso={Permisos.ArticulosVer}><AcabadosPage /></Protegida>} />
+        <Route path="bajas" element={<Protegida permiso={Permisos.MovimientosRegistrar}><BajasPage /></Protegida>} />
+        <Route path="inventario-fisico" element={<Protegida permiso={Permisos.InventarioContar}><InventarioFisicoPage /></Protegida>} />
+        <Route path="inventario-fisico/:id" element={<Protegida permiso={Permisos.InventarioContar}><ConteoPage /></Protegida>} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

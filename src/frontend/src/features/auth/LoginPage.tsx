@@ -180,7 +180,7 @@ export function LoginPage() {
         </Box>
 
         <Typography variant="caption" color="text.secondary" sx={{ position: 'absolute', bottom: 16 }}>
-          Control de Inventario Mueblería · v0.3
+          Control de Inventario Mueblería · v0.4
         </Typography>
       </Box>
     </Box>

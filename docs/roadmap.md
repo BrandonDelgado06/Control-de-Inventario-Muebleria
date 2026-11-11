@@ -28,7 +28,7 @@ Antes de la entrega final hay dos avances. Los sprints se acomodan a ellos:
 | Bitácora | RF-03, RF-04 | Cada creación, edición y movimiento queda registrado solo; consulta con filtros |
 | Ubicaciones | RF-05, RF-06 | Crear, editar, desactivar (no deja si tiene artículos) y ver qué hay en cada una |
 | Catálogo | RF-07, RF-08, RF-09 | Categorías con campos personalizados (grano, espesor, especie), artículos con otros nombres (alias) y búsqueda por ellos |
-| Inventario por tipo | RF-10, RF-12, RF-14, RF-15 (parcial) | Filtro por tipo; acabados exigen lote y vencimiento |
+| Inventario por tipo | RF-10, RF-12, RF-14, RF-15 | Filtro por tipo y por unidad de medida; acabados exigen lote y vencimiento |
 | Movimientos | RF-19, RF-20, RF-21, RF-22, RNF-06 | Entradas, salidas (no permite stock negativo), ajustes solo del administrador e historial |
 | Panel | RF-36 (inicial) | Totales, artículos bajo el mínimo y últimos movimientos |
 
@@ -46,6 +46,20 @@ Antes de la entrega final hay dos avances. Los sprints se acomodan a ellos:
 | Respaldo y restauración | RF-38, RF-39 | Hecho |
 
 El diseño de estos módulos está en [diseno-modulos-control.md](diseno-modulos-control.md).
+
+### Requerimientos que faltaban (rama `feature/RF-pendientes`)
+
+| Módulo | RF | Estado |
+|---|---|---|
+| Fotografía del artículo | RF-08 | Hecho: JPG, PNG o WEBP de hasta 3 MB, guardada en `App_Data/fotos` |
+| Historial de estados en pantalla | RF-11 | Hecho: en la ficha de cada artículo |
+| Acabados por lote | RF-13 | Hecho: pantalla agrupada por producto, el lote que vence primero arriba |
+| Consulta de materia prima por unidad | RF-15 | Hecho: filtro "Unidad" en Artículos |
+| Bajas y mermas | RF-26, RF-27 | Hecho |
+| Inventario físico | RF-28, RF-29 | Hecho: conteo por ubicación o categoría; el administrador aplica las diferencias como ajustes |
+| Filtros de artículo y responsable en reportes | RF-33 | Hecho |
+
+Con esto quedan implementados los 39 requerimientos funcionales.
 
 ## Resumen
 
