@@ -39,26 +39,37 @@ public class MovimientoService(IAppDbContext db, IUsuarioActual actual)
         var articulo = await db.Articulos.FindAsync([req.ArticuloId], ct)
             ?? throw new NoEncontradoException("Artículo", req.ArticuloId);
 
-        var (anterior, nuevo) = articulo.AplicarMovimiento(req.Tipo, req.Cantidad);
-        var cantidad = req.Tipo == TipoMovimiento.Ajuste ? Math.Abs(nuevo - anterior) : req.Cantidad;
-        if (cantidad == 0)
-            throw new DomainException($"La existencia ya es {anterior:0.##}; el ajuste no cambia nada.");
-
-        var movimiento = new Movimiento
-        {
-            ArticuloId = articulo.Id,
-            UsuarioId = actual.Id ?? throw new DomainException("No hay un usuario en sesión."),
-            Tipo = req.Tipo,
-            Cantidad = cantidad,
-            StockAnterior = anterior,
-            StockNuevo = nuevo,
-            Motivo = req.Motivo.Trim(),
-            FechaHora = DateTime.Now,
-        };
+        var movimiento = Crear(articulo, req.Tipo, req.Cantidad, req.Motivo,
+            actual.Id ?? throw new DomainException("No hay un usuario en sesión."));
         db.Movimientos.Add(movimiento);
         await db.SaveChangesAsync(ct);
 
         return await Proyectar(db.Movimientos.Where(m => m.Id == movimiento.Id)).FirstAsync(ct);
+    }
+
+    /// <summary>
+    /// Aplica el cambio de existencia al artículo y arma el movimiento que lo respalda.
+    /// Lo usan también las solicitudes (RF-25) y las herramientas de instalación (RF-16/17),
+    /// para que todo cambio de stock siga la misma regla (RNF-06).
+    /// </summary>
+    public static Movimiento Crear(Articulo articulo, TipoMovimiento tipo, decimal cantidad, string motivo, int usuarioId)
+    {
+        var (anterior, nuevo) = articulo.AplicarMovimiento(tipo, cantidad);
+        var movida = tipo == TipoMovimiento.Ajuste ? Math.Abs(nuevo - anterior) : cantidad;
+        if (movida == 0)
+            throw new DomainException($"La existencia ya es {anterior:0.##}; el ajuste no cambia nada.");
+
+        return new Movimiento
+        {
+            ArticuloId = articulo.Id,
+            UsuarioId = usuarioId,
+            Tipo = tipo,
+            Cantidad = movida,
+            StockAnterior = anterior,
+            StockNuevo = nuevo,
+            Motivo = motivo.Trim(),
+            FechaHora = DateTime.Now,
+        };
     }
 
     /// <summary>RF-22: historial cronológico (el más reciente primero).</summary>

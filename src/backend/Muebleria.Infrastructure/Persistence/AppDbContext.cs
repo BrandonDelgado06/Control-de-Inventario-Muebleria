@@ -32,6 +32,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IUsuarioActual
     public DbSet<ConteoFisico> ConteosFisicos => Set<ConteoFisico>();
     public DbSet<ConteoDetalle> ConteoDetalles => Set<ConteoDetalle>();
 
+    public void OlvidarCambios() => ChangeTracker.Clear();
+
     /// <summary>
     /// Estados con los textos exactos del diccionario de datos: "Dañada" y "De baja"
     /// no pueden ser nombres de un enum de C#, así que se traducen al guardar y al leer.
@@ -113,11 +115,21 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IUsuarioActual
         foreach (var e in ChangeTracker.Entries())
         {
             if (e.State is not (EntityState.Added or EntityState.Modified or EntityState.Deleted)) continue;
-            if (e.Entity is not (IAuditable or Movimiento)) continue;
+            if (e.Entity is not (IAuditable or Movimiento or Solicitud or SalidaHerramienta)) continue;
 
             string verbo;
             if (e.Entity is Movimiento m)
                 verbo = $"Registrar {m.Tipo.ToString().ToLowerInvariant()}";
+            else if (e.Entity is Solicitud s)
+                verbo = e.State == EntityState.Added ? "Crear" : s.Estado switch
+                {
+                    EstadoSolicitud.Aprobada => "Aprobar",
+                    EstadoSolicitud.Rechazada => "Rechazar",
+                    EstadoSolicitud.Entregada => "Entregar",
+                    _ => "Editar",
+                };
+            else if (e.Entity is SalidaHerramienta)
+                verbo = e.State == EntityState.Added ? "Registrar salida de" : "Registrar devolución de";
             else if (e.State == EntityState.Modified)
             {
                 var modificadas = e.Properties.Where(p => p.IsModified && !Equals(p.OriginalValue, p.CurrentValue)).ToList();
@@ -140,6 +152,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IUsuarioActual
         return c.Entrada.Entity switch
         {
             Movimiento m => $"{c.Verbo} de {m.Cantidad.ToString("0.##", CultureInfo.InvariantCulture)} en artículo #{m.ArticuloId}",
+            Solicitud s => $"{c.Verbo} solicitud #{id} ({s.Cantidad.ToString("0.##", CultureInfo.InvariantCulture)} del artículo #{s.ArticuloId})",
+            SalidaHerramienta h => $"{c.Verbo} herramienta #{h.ArticuloId} (salida #{id})",
             Articulo a => $"{c.Verbo} artículo {a.Codigo} (#{id})",
             Usuario u => $"{c.Verbo} usuario {u.NombreUsuario} (#{id})",
             Ubicacion u => $"{c.Verbo} ubicación {u.Nombre} (#{id})",
@@ -156,6 +170,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IUsuarioActual
         Categoria or CampoPersonalizado => "Categorías",
         Articulo => "Catálogo",
         Movimiento => "Movimientos",
+        Solicitud => "Solicitudes",
+        SalidaHerramienta => "Herramientas de instalación",
         _ => entidad.GetType().Name,
     };
 

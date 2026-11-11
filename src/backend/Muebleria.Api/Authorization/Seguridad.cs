@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Muebleria.Application.Common;
 using Muebleria.Application.Common.Interfaces;
 using Muebleria.Application.Features.Auth;
@@ -22,10 +23,15 @@ public static class Seguridad
     /// Cookie HttpOnly con expiración deslizante (RF-01: cierre por inactividad) y una política
     /// de autorización por cada permiso (RNF-02: se valida en el servidor en cada petición).
     /// </summary>
-    public static IServiceCollection AddSeguridad(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddSeguridad(this IServiceCollection services, IConfiguration config, string carpetaApp)
     {
         services.AddHttpContextAccessor();
         services.AddScoped<IUsuarioActual, UsuarioActual>();
+
+        // Las claves que firman la cookie se guardan en disco: así reiniciar el servicio no cierra las sesiones.
+        services.AddDataProtection()
+            .SetApplicationName("Muebleria.Inventario")
+            .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(carpetaApp, "App_Data", "claves")));
 
         var minutos = config.GetValue("Sesion:MinutosInactividad", 30);
         services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

@@ -27,7 +27,7 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddSeguridad(builder.Configuration);
+builder.Services.AddSeguridad(builder.Configuration, builder.Environment.ContentRootPath);
 
 var app = builder.Build();
 

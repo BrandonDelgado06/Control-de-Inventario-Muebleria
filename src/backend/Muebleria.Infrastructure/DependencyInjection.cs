@@ -22,6 +22,8 @@ public static class DependencyInjection
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
         services.AddSingleton<IHasherContrasenas, HasherContrasenas>();
         services.AddScoped<DbSeeder>();
+        services.AddSingleton<IRespaldos, Backup.RespaldosSqlServer>();
+        services.AddSingleton<IExportadorReportes, Reports.ExportadorReportes>();
         return services;
     }
 }
