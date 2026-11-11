@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Alert, Box, Button, Paper, Stack, TextField, Typography } from '@mui/material'
 import { useAuth } from '../../app/AuthContext'
+import { BotonModo } from '../../app/ModoTema'
 import { mensajeError } from '../../api/cliente'
 
 export function LoginPage() {
@@ -24,7 +25,8 @@ export function LoginPage() {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'grid', placeItems: 'center', p: 2 }}>
+    <Box sx={{ minHeight: '100vh', display: 'grid', placeItems: 'center', p: 2, position: 'relative' }}>
+      <Box sx={{ position: 'absolute', top: 12, right: 12 }}><BotonModo /></Box>
       <Paper component="form" onSubmit={enviar} sx={{ p: 4, width: '100%', maxWidth: 380 }}>
         <Stack spacing={2.5}>
           <Box>
