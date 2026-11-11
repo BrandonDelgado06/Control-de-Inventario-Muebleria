@@ -29,6 +29,7 @@ public sealed class ApiFixture : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("Seed:AdminContrasena", ClaveAdmin);
         builder.UseSetting("Seed:EncargadoContrasena", ClaveEncargado);
         builder.UseSetting("Seed:TrabajadorContrasena", ClaveTrabajador);
+        builder.UseSetting("Fotos:Carpeta", Path.Combine(Path.GetTempPath(), "muebleria-pruebas-fotos"));
     }
 
     public async Task InitializeAsync()
