@@ -34,7 +34,9 @@ public class RespaldosSqlServer(IConfiguration config) : IRespaldos
 
     public async Task<RespaldoInfo> GenerarAsync(string descripcion, CancellationToken ct)
     {
-        var archivo = Path.Combine(await CarpetaAsync(ct), $"inventario_{DateTime.Now:yyyyMMdd_HHmmss}.bak");
+        // Nombre único: dos respaldos en el mismo segundo (por ejemplo, el automático antes de restaurar)
+        // no pueden compartir archivo, porque WITH INIT sobrescribiría el anterior.
+        var archivo = Path.Combine(await CarpetaAsync(ct), $"inventario_{DateTime.Now:yyyyMMdd_HHmmss}_{Guid.NewGuid().ToString("N")[..6]}.bak");
         await using var cn = Maestra();
         await cn.OpenAsync(ct);
         // El nombre de la base es fijo (de la configuración), pero igual se protege con QUOTENAME.
@@ -64,7 +66,7 @@ public class RespaldosSqlServer(IConfiguration config) : IRespaldos
             FROM msdb.dbo.backupset bs
             JOIN msdb.dbo.backupmediafamily bmf ON bmf.media_set_id = bs.media_set_id
             WHERE bs.database_name = @db AND bs.type = 'D' AND bmf.device_type = 2
-            ORDER BY bs.backup_finish_date DESC
+            ORDER BY bs.backup_finish_date DESC, bs.backup_set_id DESC   -- msdb guarda segundos: el id desempata
             """;
         var lista = new List<RespaldoInfo>();
         await using var cn = Maestra();

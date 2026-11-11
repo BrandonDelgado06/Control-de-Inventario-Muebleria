@@ -82,6 +82,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IUsuarioActual
     // ---------------------------------------------------------------------------------
     public override async Task<int> SaveChangesAsync(CancellationToken ct = default)
     {
+        // Las acciones escritas a mano (respaldos, reportes, alertas) también respetan el VARCHAR(100) del diccionario.
+        foreach (var b in ChangeTracker.Entries<Bitacora>().Where(b => b.State == EntityState.Added))
+            b.Entity.Accion = Recortar(b.Entity.Accion, 100);
+
         var usuarioId = usuarioActual.Id;
         var cambios = usuarioId is null ? [] : CapturarCambios();
         if (cambios.Count == 0) return await base.SaveChangesAsync(ct);

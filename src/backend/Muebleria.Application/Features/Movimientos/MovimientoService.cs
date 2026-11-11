@@ -36,16 +36,32 @@ public class MovimientoService(IAppDbContext db, IUsuarioActual actual)
         if (!TiposAvance1.Contains(req.Tipo))
             throw new DomainException($"Los movimientos de tipo {req.Tipo} se registran desde su propio módulo.");
 
-        var articulo = await db.Articulos.FindAsync([req.ArticuloId], ct)
-            ?? throw new NoEncontradoException("Artículo", req.ArticuloId);
+        var usuario = actual.Id ?? throw new DomainException("No hay un usuario en sesión.");
 
-        var movimiento = Crear(articulo, req.Tipo, req.Cantidad, req.Motivo,
-            actual.Id ?? throw new DomainException("No hay un usuario en sesión."));
-        db.Movimientos.Add(movimiento);
-        await db.SaveChangesAsync(ct);
-
-        return await Proyectar(db.Movimientos.Where(m => m.Id == movimiento.Id)).FirstAsync(ct);
+        // Si otra persona movió el mismo artículo al mismo tiempo (rowversion), se vuelve a leer la
+        // existencia actualizada y se reintenta. Así dos entradas simultáneas se guardan las dos, y una
+        // salida que ya no alcanza se rechaza con el mensaje de existencia insuficiente.
+        for (var intento = 1; ; intento++)
+        {
+            var articulo = await db.Articulos.FindAsync([req.ArticuloId], ct)
+                ?? throw new NoEncontradoException("Artículo", req.ArticuloId);
+            var movimiento = Crear(articulo, req.Tipo, req.Cantidad, req.Motivo, usuario);
+            db.Movimientos.Add(movimiento);
+            try
+            {
+                await db.SaveChangesAsync(ct);
+                return await Proyectar(db.Movimientos.Where(m => m.Id == movimiento.Id)).FirstAsync(ct);
+            }
+            catch (DbUpdateConcurrencyException) when (intento < IntentosConcurrencia)
+            {
+                db.OlvidarCambios();
+                // Espera corta y aleatoria para que los que chocaron no vuelvan a chocar al mismo instante.
+                await Task.Delay(Random.Shared.Next(5, 25) * intento, ct);
+            }
+        }
     }
+
+    private const int IntentosConcurrencia = 10;
 
     /// <summary>
     /// Aplica el cambio de existencia al artículo y arma el movimiento que lo respalda.

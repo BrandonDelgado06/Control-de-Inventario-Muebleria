@@ -14,4 +14,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Muebleria.UnitTests" />
+  </ItemGroup>
+
 </Project>
