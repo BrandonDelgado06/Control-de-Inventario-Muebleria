@@ -1,16 +1,16 @@
 # Plan y resultados de pruebas · Avance 2
 
 **Fecha de ejecución:** 9 de noviembre de 2026 · **Equipo:** Windows 11, SQL Server 2022 Developer, .NET 10.0.14, Node.js 26
-**Rama:** `test/avance-2-pruebas`
+**Rama:** `test/avance-2-pruebas` · actualizado el 10 de noviembre de 2026 en `feature/RF-pendientes` (RF-08, 11, 13, 15, 26 a 29 y 33)
 
 ## Resumen
 
 | Nivel | Qué prueba | Herramientas | Pruebas | Resultado |
 |---|---|---|---:|---|
-| Unitarias | Reglas de negocio y servicios, con una base de datos en memoria | xUnit, FluentAssertions, EF Core InMemory | 49 | 49 correctas |
-| Integración | La API completa contra SQL Server real (base `MuebleriaInventario_Pruebas`, que se crea de cero en cada ejecución) | xUnit, WebApplicationFactory, SQL Server 2022 | 27 | 27 correctas |
+| Unitarias | Reglas de negocio y servicios, con una base de datos en memoria | xUnit, FluentAssertions, EF Core InMemory | 74 | 74 correctas |
+| Integración | La API completa contra SQL Server real (base `MuebleriaInventario_Pruebas`, que se crea de cero en cada ejecución) | xUnit, WebApplicationFactory, SQL Server 2022 | 33 | 33 correctas |
 | Frontend | Formato de datos y mensajes de error que ve el usuario | Vitest | 12 | 12 correctas |
-| **Total** | | | **88** | **88 correctas** |
+| **Total** | | | **119** | **119 correctas** |
 
 La suite de integración se ejecutó 6 veces seguidas sin fallos, para descartar resultados inestables en las pruebas de concurrencia.
 
@@ -66,6 +66,15 @@ Formato de la Tabla 7 del machote. En la columna "Automatizada", **U** = unitari
 | CP-34 · RF-38, RF-39 | Generar respaldo, crear una ubicación, intentar restaurar con "restaurar" en minúsculas y luego con "RESTAURAR" | Se rechaza el primer intento; el segundo devuelve la base al momento del respaldo y antes guarda una copia automática | **Cumple** (después de corregir los defectos D-1 y D-3) | I y U |
 | CP-35 · **RNF-04** | **10 usuarios simultáneos**, 150 operaciones mezcladas (buscar, ver, panel, registrar entrada) | Ninguna supera 3 segundos | Máximo **337 ms** · **Cumple** | I |
 | CP-36 · Interfaz | Formato de números, fechas sin desfase, días para vencer, nombres de estados y mensajes de error | Textos correctos en español | **Cumple** | F (12) |
+| CP-37 · RF-08 | Subir una foto PNG; subir un texto renombrado a `.jpg`; el trabajador intenta cambiarla | La foto se guarda y reemplaza a la anterior; el archivo falso se rechaza ("JPG, PNG o WEBP"); el trabajador recibe 403 | **Cumple** | U e I |
+| CP-38 · RF-11 | Dar de baja la última unidad de una herramienta | El historial de estados muestra Buena → De baja con el usuario; en la base queda "De baja" | **Cumple** | U e I |
+| CP-39 · RF-13 | Dos lotes del mismo tinte (uno vencido) y una laca | Se agrupan por producto; el lote vencido va primero; cuenta 1 vencido y 1 por vencer | **Cumple** | U e I |
+| CP-40 · RF-15 | Filtrar artículos por unidad "plancha" | Solo aparecen artículos en planchas | **Cumple** | U e I |
+| CP-41 · RF-26 | Merma por daño de 2 lijas; merma por vencimiento de un tinte que no ha vencido; merma mayor a la existencia | Resta 2 y guarda "Merma por daño: …"; los otros dos se rechazan; el trabajador recibe 403 | **Cumple** | U e I |
+| CP-42 · RF-27 | Dar de baja una herramienta y luego un material | La herramienta queda De baja y desactivada; el material se rechaza | **Cumple** | U e I |
+| CP-43 · RF-28 | Abrir un conteo por ubicación y otro que se cruza con el primero | El primero guarda la existencia del sistema de cada artículo; el segundo se rechaza | **Cumple** | U e I |
+| CP-44 · RF-29 | Contar 2 lijas menos mientras salen 5 al taller; aplicar sin terminar; aplicar como encargado | Sin terminar se rechaza ("Faltan contar…"); el encargado recibe 403; el administrador aplica: existencia 13 (no 18), un solo ajuste "Conteo físico #n: diferencia -2", la columna calculada `diferencia` da -2 y queda en la bitácora | **Cumple** | U e I |
+| CP-45 · RF-33 | Reporte de movimientos filtrado por artículo y responsable | Muestra solo esas filas y los filtros aparecen en el encabezado | **Cumple** | I |
 
 ### Detalle de rendimiento (RNF-04)
 
@@ -93,7 +102,6 @@ Defectos encontrados antes, en pruebas manuales del avance (ya corregidos): el p
 
 ## Lo que todavía no cubren
 
-- **Bajas, mermas e inventario físico** (RF-26 a RF-29): esos módulos aún no tienen pantalla ni servicio.
 - **Navegadores (RNF-09):** la revisión en Chrome, Edge y Firefox es manual. Hasta ahora se revisó en Chrome (panel del navegador); faltan Edge y Firefox.
 - **Usabilidad (RNF-05):** requiere una prueba con una persona del taller.
 - **Cierre por inactividad de 30 minutos (RF-01):** está configurado, pero no hay una prueba automática que espere 30 minutos.
