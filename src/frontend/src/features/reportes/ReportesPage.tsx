@@ -1,17 +1,17 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
-  Box, Button, Card, CardActionArea, CardContent, Chip, MenuItem, Paper, Stack, Table, TableBody, TableCell, TableHead,
+  Autocomplete, Box, Button, Card, CardActionArea, CardContent, Chip, MenuItem, Paper, Stack, Table, TableBody, TableCell, TableHead,
   TableRow, TextField, Typography,
 } from '@mui/material'
 import PictureAsPdfOutlined from '@mui/icons-material/PictureAsPdfOutlined'
 import GridOnOutlined from '@mui/icons-material/GridOnOutlined'
 import { api, mensajeError } from '../../api/cliente'
-import type { Reporte, TipoColumna, TipoReporte } from '../../api/tipos'
+import type { ArticuloResumen, Paginado, Reporte, TipoColumna, TipoReporte } from '../../api/tipos'
 import { useNotificar } from '../../components/Notificaciones'
 import { Cargando, Pagina, Vacio } from '../../components/Pagina'
 import { descargar } from '../../lib/descargar'
-import { fmtFecha, fmtFechaHora, fmtNumero } from '../../lib/formato'
+import { fmtFecha, fmtFechaHora, fmtNumero, nombreTipoMovimiento } from '../../lib/formato'
 import { useCategorias, useUbicaciones } from '../catalogo/ArticulosPage'
 
 const hoy = () => new Date().toISOString().slice(0, 10)
@@ -37,14 +37,29 @@ export function ReportesPage() {
   const [categoriaId, setCategoriaId] = useState<number | ''>('')
   const [ubicacionId, setUbicacionId] = useState<number | ''>('')
   const [tipo, setTipo] = useState('')
+  const [articulo, setArticulo] = useState<ArticuloResumen | null>(null)
+  const [busqueda, setBusqueda] = useState('')
+  const [usuarioId, setUsuarioId] = useState<number | ''>('')
   const [exportando, setExportando] = useState<string | null>(null)
 
   const actual = tipos.data?.find((t) => t.clave === clave)
   const usa = (f: string) => actual?.filtros.includes(f) ?? false
+  const articulos = useQuery({
+    queryKey: ['articulos', 'buscar', busqueda, 'inactivos'],
+    queryFn: async () => (await api.get<Paginado<ArticuloResumen>>('/articulos', { params: { texto: busqueda, tamano: 15, incluirInactivos: true } })).data.items,
+    enabled: usa('articulo'),
+  })
+  const responsables = useQuery({
+    queryKey: ['reportes', 'responsables'],
+    queryFn: async () => (await api.get<{ id: number; nombre: string }[]>('/reportes/responsables')).data,
+    enabled: usa('usuario'),
+  })
   const params = Object.fromEntries(Object.entries({
     desde: usa('periodo') ? desde : undefined, hasta: usa('periodo') ? hasta : undefined,
     categoriaId: usa('categoria') ? categoriaId : undefined, ubicacionId: usa('ubicacion') ? ubicacionId : undefined,
     tipo: usa('tipo') ? tipo : undefined,
+    articuloId: usa('articulo') ? articulo?.id : undefined,
+    usuarioId: usa('usuario') ? usuarioId : undefined,
   }).filter(([, v]) => v !== undefined && v !== ''))
 
   const reporte = useQuery({
@@ -101,7 +116,28 @@ export function ReportesPage() {
               {usa('tipo') && (
                 <TextField id="tipo" select label="Tipo de movimiento" value={tipo} onChange={(e) => setTipo(e.target.value)}>
                   <MenuItem value="">Todos</MenuItem>
-                  {['Entrada', 'Salida', 'Ajuste'].map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+                  {Object.entries(nombreTipoMovimiento).map(([k, v]) => <MenuItem key={k} value={k}>{v}</MenuItem>)}
+                </TextField>
+              )}
+              {usa('articulo') && (
+                <Autocomplete
+                  id="articulo"
+                  options={articulos.data ?? []}
+                  value={articulo}
+                  onChange={(_, v) => setArticulo(v)}
+                  onInputChange={(_, v) => setBusqueda(v)}
+                  getOptionLabel={(o) => `${o.codigo} · ${o.nombre}`}
+                  isOptionEqualToValue={(a, b) => a.id === b.id}
+                  filterOptions={(x) => x}
+                  loading={articulos.isFetching}
+                  noOptionsText="Sin resultados"
+                  renderInput={(p) => <TextField {...p} label="Artículo" placeholder="Todos" />}
+                />
+              )}
+              {usa('usuario') && (
+                <TextField id="usuario" select label="Responsable" value={usuarioId} onChange={(e) => setUsuarioId(e.target.value === '' ? '' : Number(e.target.value))}>
+                  <MenuItem value="">Todos</MenuItem>
+                  {responsables.data?.map((u) => <MenuItem key={u.id} value={u.id}>{u.nombre}</MenuItem>)}
                 </TextField>
               )}
             </Box>

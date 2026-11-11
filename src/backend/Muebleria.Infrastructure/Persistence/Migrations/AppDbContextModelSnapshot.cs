@@ -349,7 +349,7 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id_articulo");
 
-                    b.Property<decimal>("CantidadContada")
+                    b.Property<decimal?>("CantidadContada")
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)")
                         .HasColumnName("cantidad_contada");
@@ -358,7 +358,7 @@ namespace Muebleria.Infrastructure.Persistence.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id_conteo");
 
-                    b.Property<decimal>("Diferencia")
+                    b.Property<decimal?>("Diferencia")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)")

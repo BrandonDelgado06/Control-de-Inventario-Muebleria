@@ -18,6 +18,9 @@ import AssignmentOutlined from '@mui/icons-material/AssignmentOutlined'
 import NotificationsOutlined from '@mui/icons-material/NotificationsOutlined'
 import AssessmentOutlined from '@mui/icons-material/AssessmentOutlined'
 import BackupOutlined from '@mui/icons-material/BackupOutlined'
+import FormatPaintOutlined from '@mui/icons-material/FormatPaintOutlined'
+import DeleteSweepOutlined from '@mui/icons-material/DeleteSweepOutlined'
+import FactCheckOutlined from '@mui/icons-material/FactCheckOutlined'
 import LogoutOutlined from '@mui/icons-material/LogoutOutlined'
 import { useAuth } from './AuthContext'
 import { BotonModo } from './ModoTema'
@@ -35,9 +38,12 @@ const grupos: { titulo: string; items: Item[] }[] = [
     items: [
       { a: '/', texto: 'Inicio', icono: <HomeOutlined /> },
       { a: '/articulos', texto: 'Artículos', icono: <Inventory2Outlined />, permiso: Permisos.ArticulosVer },
+      { a: '/acabados', texto: 'Acabados por lote', icono: <FormatPaintOutlined />, permiso: Permisos.ArticulosVer },
       { a: '/movimientos', texto: 'Entradas y salidas', icono: <SwapVertOutlined />, permiso: Permisos.ArticulosVer },
       { a: '/instalacion', texto: 'Herramientas fuera', icono: <HandymanOutlined />, permiso: Permisos.HerramientasPrestar },
       { a: '/solicitudes', texto: 'Solicitudes', icono: <AssignmentOutlined />, permiso: Permisos.SolicitudesCrear, contador: 'solicitudes' },
+      { a: '/bajas', texto: 'Bajas y mermas', icono: <DeleteSweepOutlined />, permiso: Permisos.MovimientosRegistrar },
+      { a: '/inventario-fisico', texto: 'Inventario físico', icono: <FactCheckOutlined />, permiso: Permisos.InventarioContar },
     ],
   },
   {
@@ -121,7 +127,7 @@ export function Layout() {
         })}
       </Box>
       <Divider />
-      <Typography variant="caption" color="text.secondary" sx={{ px: 2.5, py: 1.5 }}>Control de Inventario Mueblería · v0.3</Typography>
+      <Typography variant="caption" color="text.secondary" sx={{ px: 2.5, py: 1.5 }}>Control de Inventario Mueblería · v0.4</Typography>
     </Box>
   )
 

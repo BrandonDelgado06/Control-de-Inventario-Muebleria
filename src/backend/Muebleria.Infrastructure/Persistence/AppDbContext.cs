@@ -119,7 +119,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IUsuarioActual
         foreach (var e in ChangeTracker.Entries())
         {
             if (e.State is not (EntityState.Added or EntityState.Modified or EntityState.Deleted)) continue;
-            if (e.Entity is not (IAuditable or Movimiento or Solicitud or SalidaHerramienta)) continue;
+            if (e.Entity is not (IAuditable or Movimiento or Solicitud or SalidaHerramienta or ConteoFisico)) continue;
 
             string verbo;
             if (e.Entity is Movimiento m)
@@ -132,6 +132,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IUsuarioActual
                     EstadoSolicitud.Entregada => "Entregar",
                     _ => "Editar",
                 };
+            else if (e.Entity is ConteoFisico cf)
+            {
+                if (e.State == EntityState.Modified && cf.Estado != EstadoConteo.Aplicado) continue; // solo cabecera: abrir y aplicar
+                verbo = e.State == EntityState.Added ? "Abrir" : e.State == EntityState.Deleted ? "Eliminar" : "Aplicar";
+            }
             else if (e.Entity is SalidaHerramienta)
                 verbo = e.State == EntityState.Added ? "Registrar salida de" : "Registrar devolución de";
             else if (e.State == EntityState.Modified)
@@ -157,6 +162,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IUsuarioActual
         {
             Movimiento m => $"{c.Verbo} de {m.Cantidad.ToString("0.##", CultureInfo.InvariantCulture)} en artículo #{m.ArticuloId}",
             Solicitud s => $"{c.Verbo} solicitud #{id} ({s.Cantidad.ToString("0.##", CultureInfo.InvariantCulture)} del artículo #{s.ArticuloId})",
+            ConteoFisico => $"{c.Verbo} conteo físico #{id}",
             SalidaHerramienta h => $"{c.Verbo} herramienta #{h.ArticuloId} (salida #{id})",
             Articulo a => $"{c.Verbo} artículo {a.Codigo} (#{id})",
             Usuario u => $"{c.Verbo} usuario {u.NombreUsuario} (#{id})",
@@ -173,7 +179,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IUsuarioActual
         Ubicacion => "Ubicaciones",
         Categoria or CampoPersonalizado => "Categorías",
         Articulo => "Catálogo",
+        Movimiento { Tipo: TipoMovimiento.Baja or TipoMovimiento.Merma } => "Bajas y mermas",
         Movimiento => "Movimientos",
+        ConteoFisico => "Inventario físico",
         Solicitud => "Solicitudes",
         SalidaHerramienta => "Herramientas de instalación",
         _ => entidad.GetType().Name,

@@ -28,6 +28,14 @@ export function useUbicaciones(incluirInactivas = false) {
   })
 }
 
+export function useUnidades() {
+  return useQuery({
+    queryKey: ['unidades'],
+    queryFn: async () => (await api.get<string[]>('/articulos/unidades')).data,
+    staleTime: Infinity,
+  })
+}
+
 export function ArticulosPage() {
   const { tiene } = useAuth()
   const navegar = useNavigate()
@@ -35,6 +43,7 @@ export function ArticulosPage() {
   const [categoriaId, setCategoriaId] = useState<number | ''>('')
   const [ubicacionId, setUbicacionId] = useState<number | ''>('')
   const [tipo, setTipo] = useState<TipoInventario | ''>('')
+  const [unidadMedida, setUnidadMedida] = useState('')
   const [bajoMinimo, setBajoMinimo] = useState(false)
   const [inactivos, setInactivos] = useState(false)
   const [pagina, setPagina] = useState(0)
@@ -43,7 +52,8 @@ export function ArticulosPage() {
 
   const categorias = useCategorias()
   const ubicaciones = useUbicaciones()
-  const filtros = { texto, categoriaId, ubicacionId, tipo, bajoMinimo, incluirInactivos: inactivos, pagina: pagina + 1, tamano }
+  const unidades = useUnidades()
+  const filtros = { texto, categoriaId, ubicacionId, tipo, unidadMedida, bajoMinimo, incluirInactivos: inactivos, pagina: pagina + 1, tamano }
   const { data, isLoading } = useQuery({
     queryKey: ['articulos', filtros],
     queryFn: async () => (await api.get<Paginado<ArticuloResumen>>('/articulos', {
@@ -62,7 +72,7 @@ export function ArticulosPage() {
       )}
     >
       <Paper sx={{ p: 2 }}>
-        <Box sx={{ display: 'grid', gap: 1.5, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', lg: '2fr 1fr 1fr 1fr' } }}>
+        <Box sx={{ display: 'grid', gap: 1.5, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', lg: '2fr 1fr 1fr 1fr 1fr' } }}>
           <TextField id="buscar" placeholder="Buscar por código, nombre u otro nombre…" value={texto}
             onChange={(e) => cambiar(setTexto)(e.target.value)}
             slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment> } }} />
@@ -77,6 +87,11 @@ export function ArticulosPage() {
           <TextField id="filtro-ubicacion" select label="Ubicación" value={ubicacionId} onChange={(e) => cambiar(setUbicacionId)(e.target.value === '' ? '' : Number(e.target.value))}>
             <MenuItem value="">Todas</MenuItem>
             {ubicaciones.data?.map((u) => <MenuItem key={u.id} value={u.id}>{u.nombre}</MenuItem>)}
+          </TextField>
+          {/* RF-15: consultar la materia prima por su unidad (metros, planchas, kilos…). */}
+          <TextField id="filtro-unidad" select label="Unidad" value={unidadMedida} onChange={(e) => cambiar(setUnidadMedida)(e.target.value)}>
+            <MenuItem value="">Todas</MenuItem>
+            {unidades.data?.map((u) => <MenuItem key={u} value={u} sx={{ textTransform: 'capitalize' }}>{u}</MenuItem>)}
           </TextField>
         </Box>
         <Stack direction="row" sx={{ mt: 1, flexWrap: 'wrap' }}>

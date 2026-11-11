@@ -19,11 +19,22 @@ public record ArticuloResumenDto(
 public record ValorCampoDto(int CampoId, string Campo, TipoDato TipoDato, bool Obligatorio, IReadOnlyList<string> Opciones, string? Valor);
 
 public record ArticuloDetalleDto(
-    ArticuloResumenDto Articulo, string? Presentacion, IReadOnlyList<string> Alias, IReadOnlyList<ValorCampoDto> Campos);
+    ArticuloResumenDto Articulo, string? Presentacion, IReadOnlyList<string> Alias, IReadOnlyList<ValorCampoDto> Campos, bool TieneFoto);
+
+/// <summary>RF-11: un cambio de estado del artículo.</summary>
+public record HistorialEstadoDto(int Id, DateTime FechaHora, EstadoArticulo EstadoAnterior, EstadoArticulo EstadoNuevo, string Usuario);
+
+/// <summary>RF-13: un lote de un producto de acabado.</summary>
+public record LoteAcabadoDto(
+    int ArticuloId, string Codigo, string? Lote, string? Presentacion, string Ubicacion, decimal Existencia,
+    decimal StockMinimo, DateOnly? FechaVencimiento, int? DiasParaVencer);
+
+/// <summary>RF-13: un producto de acabado con todos sus lotes (el que vence primero, arriba).</summary>
+public record AcabadoAgrupadoDto(string Producto, string UnidadMedida, decimal ExistenciaTotal, int LotesVencidos, int LotesPorVencer, IReadOnlyList<LoteAcabadoDto> Lotes);
 
 public record ArticuloFiltro(
     string? Texto = null, int? CategoriaId = null, int? UbicacionId = null, TipoInventario? Tipo = null,
-    bool BajoMinimo = false, bool IncluirInactivos = false, int Pagina = 1, int Tamano = 25);
+    string? UnidadMedida = null, bool BajoMinimo = false, bool IncluirInactivos = false, int Pagina = 1, int Tamano = 25);
 
 public record ArticuloRequest(
     [Required(ErrorMessage = "El código es obligatorio."), MaxLength(30)] string Codigo,
@@ -62,6 +73,7 @@ public class ArticuloService(IAppDbContext db, IUsuarioActual actual)
         if (f.CategoriaId is { } c) q = q.Where(a => a.CategoriaId == c);
         if (f.UbicacionId is { } u) q = q.Where(a => a.UbicacionId == u);
         if (f.Tipo is { } tipo) q = q.Where(a => a.Categoria.TipoInventario == tipo);
+        if (!string.IsNullOrWhiteSpace(f.UnidadMedida)) { var um = f.UnidadMedida.Trim(); q = q.Where(a => a.UnidadMedida == um); }
         if (f.BajoMinimo) q = q.Where(a => a.StockActual <= a.StockMinimo);
 
         return q.OrderBy(a => a.Nombre).Select(AResumen).PaginarAsync(f.Pagina, f.Tamano, ct);
@@ -72,7 +84,7 @@ public class ArticuloService(IAppDbContext db, IUsuarioActual actual)
         var resumen = await db.Articulos.Where(a => a.Id == id).Select(AResumen).FirstOrDefaultAsync(ct)
             ?? throw new NoEncontradoException("Artículo", id);
         var extra = await db.Articulos.Where(a => a.Id == id)
-            .Select(a => new { a.Presentacion, Alias = a.Alias.Select(x => x.Alias).ToList() })
+            .Select(a => new { a.Presentacion, a.FotoRuta, Alias = a.Alias.Select(x => x.Alias).ToList() })
             .FirstAsync(ct);
         var campos = await db.CamposPersonalizados.Where(c => c.CategoriaId == resumen.CategoriaId).OrderBy(c => c.Orden).ToListAsync(ct);
         var valores = await db.ArticuloValores.Where(v => v.ArticuloId == id).ToDictionaryAsync(v => v.CampoId, v => v.Valor, ct);
@@ -83,7 +95,55 @@ public class ArticuloService(IAppDbContext db, IUsuarioActual actual)
             return new ValorCampoDto(c.Id, c.Nombre, c.TipoDato, c.Obligatorio, dto.Opciones, valores.GetValueOrDefault(c.Id));
         }).ToList();
 
-        return new ArticuloDetalleDto(resumen, extra.Presentacion, extra.Alias, camposDto);
+        return new ArticuloDetalleDto(resumen, extra.Presentacion, extra.Alias, camposDto, extra.FotoRuta is not null);
+    }
+
+    /// <summary>RF-11: historial de estados del artículo (el más reciente primero).</summary>
+    public async Task<List<HistorialEstadoDto>> HistorialEstadosAsync(int id, CancellationToken ct)
+    {
+        if (!await db.Articulos.AnyAsync(a => a.Id == id, ct)) throw new NoEncontradoException("Artículo", id);
+        return await db.HistorialEstados.Where(h => h.ArticuloId == id)
+            .OrderByDescending(h => h.FechaHora).ThenByDescending(h => h.Id)
+            .Select(h => new HistorialEstadoDto(h.Id, h.FechaHora, h.EstadoAnterior, h.EstadoNuevo, h.Usuario.Nombre))
+            .ToListAsync(ct);
+    }
+
+    /// <summary>
+    /// RF-13: existencias de acabados agrupadas por producto, con cada lote y su vencimiento.
+    /// Dentro de cada producto, los lotes van del que vence primero al último (se usa primero el más próximo).
+    /// </summary>
+    public async Task<List<AcabadoAgrupadoDto>> AcabadosPorLoteAsync(string? texto, CancellationToken ct)
+    {
+        var q = db.Articulos.Where(a => a.Activo && a.Categoria.TipoInventario == TipoInventario.Acabado);
+        if (!string.IsNullOrWhiteSpace(texto))
+        {
+            var t = texto.Trim();
+            q = q.Where(a => a.Codigo.Contains(t) || a.Nombre.Contains(t) || (a.Lote != null && a.Lote.Contains(t)));
+        }
+        var filas = await q.Select(a => new
+        {
+            a.Id, a.Codigo, a.Nombre, a.UnidadMedida, a.Lote, a.Presentacion, Ubicacion = a.Ubicacion.Nombre,
+            a.StockActual, a.StockMinimo, a.FechaVencimiento,
+        }).ToListAsync(ct);
+
+        var hoy = DateOnly.FromDateTime(DateTime.Today);
+        var diasAviso = int.TryParse(await db.Configuraciones.Where(c => c.Clave == Alertas.AlertaService.ClaveDias)
+            .Select(c => c.Valor).FirstOrDefaultAsync(ct), out var dias) ? dias : 30;
+        return filas
+            .GroupBy(f => (f.Nombre, f.UnidadMedida))
+            .Select(g =>
+            {
+                var lotes = g.OrderBy(f => f.FechaVencimiento ?? DateOnly.MaxValue).ThenBy(f => f.Lote)
+                    .Select(f => new LoteAcabadoDto(f.Id, f.Codigo, f.Lote, f.Presentacion, f.Ubicacion, f.StockActual, f.StockMinimo,
+                        f.FechaVencimiento, f.FechaVencimiento is { } v ? v.DayNumber - hoy.DayNumber : null))
+                    .ToList();
+                return new AcabadoAgrupadoDto(g.Key.Nombre, g.Key.UnidadMedida, lotes.Sum(l => l.Existencia),
+                    lotes.Count(l => l.DiasParaVencer < 0),
+                    lotes.Count(l => l.DiasParaVencer is { } d && d >= 0 && d <= diasAviso),
+                    lotes);
+            })
+            .OrderBy(g => g.Producto)
+            .ToList();
     }
 
     /// <summary>RF-08: registro de artículo. Si trae existencia inicial, se registra como una entrada.</summary>

@@ -38,6 +38,9 @@ public class ReportesController(ReporteService reportes) : ControllerBase
     [HttpGet]
     public IReadOnlyList<TipoReporteDto> Tipos() => ReporteService.Tipos;
 
+    [HttpGet("responsables")]
+    public Task<List<Application.Features.Instalacion.PersonaDto>> Responsables(CancellationToken ct) => reportes.ResponsablesAsync(ct);
+
     [HttpGet("{clave}")]
     public Task<ReporteDto> Ver(string clave, [FromQuery] ReporteFiltro filtro, CancellationToken ct) => reportes.GenerarAsync(clave, filtro, ct);
 

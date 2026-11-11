@@ -12,7 +12,7 @@ namespace Muebleria.Api.Controllers;
 /// <summary>RF-08 a RF-15: catálogo de artículos.</summary>
 [ApiController]
 [Route("api/articulos")]
-public class ArticulosController(ArticuloService articulos) : ControllerBase
+public class ArticulosController(ArticuloService articulos, FotoService fotos) : ControllerBase
 {
     [HttpGet]
     [Authorize(Policy = Permisos.ArticulosVer)]
@@ -21,6 +21,45 @@ public class ArticulosController(ArticuloService articulos) : ControllerBase
     [HttpGet("{id:int}")]
     [Authorize(Policy = Permisos.ArticulosVer)]
     public Task<ArticuloDetalleDto> Obtener(int id, CancellationToken ct) => articulos.ObtenerAsync(id, ct);
+
+    /// <summary>RF-11: historial de cambios de estado.</summary>
+    [HttpGet("{id:int}/estados")]
+    [Authorize(Policy = Permisos.ArticulosVer)]
+    public Task<List<HistorialEstadoDto>> Estados(int id, CancellationToken ct) => articulos.HistorialEstadosAsync(id, ct);
+
+    /// <summary>RF-13: acabados agrupados por producto, con sus lotes y vencimientos.</summary>
+    [HttpGet("acabados")]
+    [Authorize(Policy = Permisos.ArticulosVer)]
+    public Task<List<AcabadoAgrupadoDto>> Acabados([FromQuery] string? texto, CancellationToken ct) => articulos.AcabadosPorLoteAsync(texto, ct);
+
+    /// <summary>RF-08: fotografía del artículo.</summary>
+    [HttpGet("{id:int}/foto")]
+    [Authorize(Policy = Permisos.ArticulosVer)]
+    public async Task<IActionResult> Foto(int id, CancellationToken ct)
+    {
+        var foto = await fotos.ObtenerAsync(id, ct);
+        Response.Headers.CacheControl = "private, no-cache";
+        return File(foto.Contenido, foto.TipoContenido);
+    }
+
+    [HttpPost("{id:int}/foto")]
+    [Authorize(Policy = Permisos.ArticulosEditar)]
+    [RequestSizeLimit(FotoService.TamanoMaximo + 64 * 1024)]
+    public async Task<IActionResult> SubirFoto(int id, IFormFile? archivo, CancellationToken ct)
+    {
+        if (archivo is null) return Problem(statusCode: 400, title: "Elige una foto.");
+        await using var contenido = archivo.OpenReadStream();
+        await fotos.SubirAsync(id, contenido, archivo.Length, ct);
+        return NoContent();
+    }
+
+    [HttpDelete("{id:int}/foto")]
+    [Authorize(Policy = Permisos.ArticulosEditar)]
+    public async Task<IActionResult> EliminarFoto(int id, CancellationToken ct)
+    {
+        await fotos.EliminarAsync(id, ct);
+        return NoContent();
+    }
 
     [HttpGet("unidades")]
     [Authorize(Policy = Permisos.ArticulosVer)]

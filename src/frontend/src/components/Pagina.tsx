@@ -14,7 +14,7 @@ export function Pagina({ titulo, subtitulo, acciones, children }: {
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ justifyContent: 'space-between', alignItems: { sm: 'flex-end' } }}>
         <Box>
           <Typography variant="h1">{titulo}</Typography>
-          {subtitulo && <Typography color="text.secondary" sx={{ mt: 0.5 }}>{subtitulo}</Typography>}
+          {subtitulo && <Typography component="div" color="text.secondary" sx={{ mt: 0.5 }}>{subtitulo}</Typography>}
         </Box>
         {acciones && <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>{acciones}</Stack>}
       </Stack>

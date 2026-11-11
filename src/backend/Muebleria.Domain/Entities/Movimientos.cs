@@ -81,7 +81,8 @@ public class ConteoDetalle
     public int ArticuloId { get; set; }
     public Articulo Articulo { get; set; } = null!;
     public decimal StockSistema { get; set; }
-    public decimal CantidadContada { get; set; }
+    /// <summary>Nulo mientras el artículo no se ha contado.</summary>
+    public decimal? CantidadContada { get; set; }
     /// <summary>Columna calculada en la base de datos: contada − sistema.</summary>
-    public decimal Diferencia { get; private set; }
+    public decimal? Diferencia { get; private set; }
 }
